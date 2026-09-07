@@ -13,7 +13,9 @@ class ConnectionRepository(
 
     fun list(): List<ConnectionProfile> {
         if (!storeFile.exists()) return emptyList()
-        return json.decodeFromString<List<ConnectionProfile>>(storeFile.readText())
+        val content = storeFile.readText()
+        if (content.isBlank()) return emptyList()
+        return json.decodeFromString<List<ConnectionProfile>>(content)
     }
 
     fun save(profile: ConnectionProfile) {

@@ -10,8 +10,12 @@ kotlin {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(project(":core:database"))
     implementation(project(":feature:grid"))
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(libs.rsyntaxtextarea)

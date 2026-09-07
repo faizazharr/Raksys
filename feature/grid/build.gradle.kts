@@ -10,6 +10,7 @@ kotlin {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
 }

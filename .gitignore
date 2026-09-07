@@ -1,8 +1,13 @@
 .gradle/
 build/
+bin/
 .idea/
 *.iml
 out/
 local.properties
 .kotlin/
 .DS_Store
+
+# Local-only AI tooling config — internal conventions, not for the public repo.
+CLAUDE.md
+.aiignore

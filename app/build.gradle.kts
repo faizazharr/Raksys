@@ -10,16 +10,22 @@ kotlin {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(project(":core:security"))
     implementation(project(":core:database"))
     implementation(project(":feature:connection"))
     implementation(project(":feature:navigator"))
     implementation(project(":feature:grid"))
     implementation(project(":feature:query"))
+    implementation(project(":feature:document"))
+    implementation(project(":feature:keyvalue"))
+    implementation(project(":feature:permission"))
+    implementation(project(":feature:erd"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.koin.core)
+    implementation(libs.koin.compose)
 }
 
 compose.desktop {

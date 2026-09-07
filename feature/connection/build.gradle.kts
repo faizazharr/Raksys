@@ -11,9 +11,18 @@ kotlin {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(project(":core:security"))
     implementation(project(":core:database"))
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
+    testImplementation(libs.kotlin.test.junit5)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
