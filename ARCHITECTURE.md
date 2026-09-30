@@ -177,7 +177,7 @@ Rules:
 - **Menu-to-screen commands** go through `RaksysCommands` (e.g. `requestRunQuery()`), so `app` does not depend on feature internals.
 - **Environment edge**: a 2 dp line across the top of the window shows the active connection's environment (DEV green, STG amber, PROD red). It is the one signature element of the app; do not add competing brand accents.
 - **Hover and focus**: add `Modifier.raksysInteractive(...)` right before `.clickable { }` on custom rows, tabs, and cards. It adds a hover highlight and a 2 dp focus ring while keeping a single tab stop.
-- **Icons**: workspace chrome uses the vector icons in `WorkspaceIcons.kt` (one stroke weight, colors passed by the caller), not emoji.
+- **Icons**: use the vector icons in `WorkspaceIcons.kt` and `ActionIcons.kt` (one stroke weight, color passed by the caller), never emoji. Give an icon-only button a `contentDescription` so screen readers announce it; leave it null when a text label sits beside the icon. Icon-only buttons are at least 28 dp.
 - **Shortcuts**: label them with `RaksysPlatform.shortcut("K")` so they read ⌘K on macOS and Ctrl+K elsewhere. Every app-level command must also exist in the menu bar (`Main.kt` → `MenuBar`).
 
 ## 🧪 Testing

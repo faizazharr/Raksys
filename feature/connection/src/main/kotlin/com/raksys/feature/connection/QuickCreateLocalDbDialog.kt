@@ -21,6 +21,8 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
 import com.raksys.core.model.EnvironmentType
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.DatabaseIcon
+import com.raksys.core.ui.EyeIcon
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysThemeColors
 import java.util.UUID
@@ -85,7 +87,7 @@ fun QuickCreateLocalDbDialog(
                         .padding(horizontal = 20.dp, vertical = 14.dp),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("⚡", fontSize = 16.sp)
+                        DatabaseIcon(color = RaksysThemeColors.Primary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Buat Database Lokal",
@@ -161,8 +163,8 @@ fun QuickCreateLocalDbDialog(
                                 singleLine = true,
                                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 trailingIcon = {
-                                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }, modifier = Modifier.size(20.dp)) {
-                                        Text(if (isPasswordVisible) "🙈" else "👁", fontSize = 11.sp)
+                                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }, modifier = Modifier.size(28.dp)) {
+                                        EyeIcon(color = RaksysThemeColors.TextSecondary, slashed = isPasswordVisible, size = 13.dp, contentDescription = if (isPasswordVisible) "Sembunyikan password" else "Tampilkan password")
                                     }
                                 },
                                 colors = fieldColors,

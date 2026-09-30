@@ -17,6 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
+import com.raksys.core.ui.TrashIcon
+import com.raksys.core.ui.EditIcon
+import com.raksys.core.ui.CopyIcon
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
@@ -124,18 +127,18 @@ fun ConnectionCard(
             ) {
                 IconButton(
                     onClick = onClone,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 ) {
-                    Text("📑", fontSize = 11.sp)
+                    CopyIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp, contentDescription = "Duplikat koneksi ${profile.name}")
                 }
 
                 Spacer(modifier = Modifier.width(2.dp))
 
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 ) {
-                    Text("✏️", fontSize = 11.sp)
+                    EditIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp, contentDescription = "Edit koneksi ${profile.name}")
                 }
 
                 Spacer(modifier = Modifier.width(2.dp))
@@ -161,9 +164,9 @@ fun ConnectionCard(
 
                 IconButton(
                     onClick = onDelete,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 ) {
-                    Text("🗑", fontSize = 11.sp)
+                    TrashIcon(color = RaksysThemeColors.Error, size = 13.dp, contentDescription = "Hapus koneksi ${profile.name}")
                 }
             }
         }

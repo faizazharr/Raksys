@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.PrivilegeType
 import com.raksys.core.model.TablePrivilege
+import com.raksys.core.ui.SearchIcon
 import com.raksys.core.ui.RaksysThemeColors
 
 @Composable
@@ -71,7 +72,7 @@ fun PrivilegeMatrix(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔍", fontSize = 11.sp)
+                    SearchIcon(color = RaksysThemeColors.TextMuted, size = 12.dp)
                     Spacer(modifier = Modifier.width(4.dp))
                     BasicTextField(
                         value = filterText,

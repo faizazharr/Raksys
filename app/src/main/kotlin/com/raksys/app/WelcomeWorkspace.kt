@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.raksys.core.ui.QueryIcon
+import com.raksys.core.ui.LockIcon
 import com.raksys.core.ui.DatabaseIcon
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.LightningIcon
@@ -108,7 +110,7 @@ fun WelcomeWorkspace(
                         .background(RaksysThemeColors.Primary.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("💡", fontSize = 13.sp)
+                    Text("i", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.Primary)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
@@ -244,7 +246,7 @@ fun WelcomeWorkspace(
                             .padding(horizontal = 12.dp, vertical = 9.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🔒", fontSize = 12.sp)
+                            LockIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Kredensial disimpan aman via OS Keyring (Apple Keychain / Secret Service).",
@@ -365,7 +367,7 @@ fun WelcomeWorkspace(
                             .padding(horizontal = 12.dp, vertical = 9.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("⚡", fontSize = 12.sp)
+                            QueryIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Dukungan multi-engine memungkinkan analisis data SQL & NoSQL sekaligus.",

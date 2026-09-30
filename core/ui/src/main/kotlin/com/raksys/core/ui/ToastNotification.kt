@@ -62,7 +62,7 @@ fun ToastHost(modifier: Modifier = Modifier) {
             toast?.let { item ->
                 val bg = if (item.isError) RaksysThemeColors.ErrorBg else RaksysThemeColors.SurfaceElevated
                 val border = if (item.isError) RaksysThemeColors.Error else RaksysThemeColors.Primary
-                val icon = if (item.isError) "❌" else "✓"
+                val icon = if (item.isError) "✕" else "✓"
 
                 Row(
                     modifier = Modifier

@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,6 +97,7 @@ private fun RelationalTabBar(
                 onClick = onToggleSidebar,
                 modifier = Modifier
                     .size(28.dp)
+                    .semantics { contentDescription = if (isSidebarVisible) "Sembunyikan sidebar" else "Tampilkan sidebar" }
                     .clip(RoundedCornerShape(6.dp))
                     .background(if (!isSidebarVisible) RaksysThemeColors.PrimaryContainer else RaksysThemeColors.SurfaceElevated)
             ) {

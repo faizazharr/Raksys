@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,7 +81,7 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                         }
                     }
                     IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                        Text("✕", fontSize = 11.sp, color = Color(0xFFA7F3D0))
+                        Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = Color(0xFFA7F3D0))
                     }
                 }
             }
@@ -109,7 +111,7 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                             )
                         }
                         IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                            Text("✕", fontSize = 11.sp, color = Color(0xFFFF7B72))
+                            Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = Color(0xFFFF7B72))
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))

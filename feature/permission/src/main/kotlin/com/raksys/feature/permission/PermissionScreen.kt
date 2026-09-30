@@ -41,6 +41,8 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DatabaseRole
 import com.raksys.core.model.PrivilegeType
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.ShieldIcon
+import com.raksys.core.ui.UserIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysErrorState
 import com.raksys.core.ui.RaksysLoadingState
@@ -87,7 +89,7 @@ fun PermissionScreen(profile: ConnectionProfile, modifier: Modifier = Modifier) 
                 Row(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.width(220.dp).fillMaxHeight().background(RaksysThemeColors.Surface)) {
                         if (data.roles.isEmpty()) {
-                            RaksysEmptyState(iconLabel = "👤", title = "Belum Ada Role", description = "Database ini belum punya role/user selain default.")
+                            RaksysEmptyState(iconContent = { UserIcon(color = RaksysThemeColors.TextSecondary, size = 30.dp) }, title = "Belum Ada Role", description = "Database ini belum punya role/user selain default.")
                         } else {
                             LazyColumn(contentPadding = PaddingValues(8.dp)) {
                                 items(data.roles, key = { it.name }) { role ->
@@ -102,7 +104,7 @@ fun PermissionScreen(profile: ConnectionProfile, modifier: Modifier = Modifier) 
                     Box(modifier = Modifier.fillMaxSize()) {
                         val role = selectedRole
                         if (role == null) {
-                            RaksysEmptyState(iconLabel = "🔐", title = "Pilih Role", description = "Pilih role di panel kiri untuk lihat/atur privilege per tabel.")
+                            RaksysEmptyState(iconContent = { ShieldIcon(color = RaksysThemeColors.TextSecondary, size = 30.dp) }, title = "Pilih Role", description = "Pilih role di panel kiri untuk lihat/atur privilege per tabel.")
                         } else {
                             PrivilegeMatrix(
                                 tables = data.tables,

@@ -152,7 +152,7 @@ fun KeyValueBrowser(
                 )
                 is UiState.Success -> {
                     if (current.data.isEmpty()) {
-                        RaksysEmptyState(iconLabel = "🔑", title = "Tidak Ada Key", description = "Tidak ada key yang cocok dengan pola '$pattern'.")
+                        RaksysEmptyState(iconContent = { KeyIcon(color = RaksysThemeColors.TextSecondary, size = 30.dp) }, title = "Tidak Ada Key", description = "Tidak ada key yang cocok dengan pola '$pattern'.")
                     } else {
                         val types = listOf("ALL", "string", "hash", "list", "set", "zset")
                         val filteredEntries = remember(current.data, selectedTypeFilter) {
@@ -267,7 +267,7 @@ fun KeyValueBrowser(
                                                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                                                 modifier = Modifier.height(22.dp)
                                             ) {
-                                                Text("📋 Salin", fontSize = 11.sp)
+                                                Text("Salin", fontSize = 11.sp)
                                             }
                                         }
                                     }

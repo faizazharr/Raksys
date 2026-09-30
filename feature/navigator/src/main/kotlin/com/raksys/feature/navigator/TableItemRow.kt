@@ -12,6 +12,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -105,10 +107,11 @@ fun TableItemRow(
         Box {
             IconButton(
                 onClick = { menuExpanded = true },
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(24.dp)
             ) {
                 Text(
                     text = "⋮",
+                    modifier = Modifier.semantics { contentDescription = "Aksi tabel ${table.name}" },
                     fontSize = 12.sp,
                     color = RaksysThemeColors.TextMuted
                 )
@@ -120,14 +123,14 @@ fun TableItemRow(
                 modifier = Modifier.background(RaksysThemeColors.Surface)
             ) {
                 DropdownMenuItem(
-                    text = { Text("📄 Buka Data (100 baris)", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
+                    text = { Text("Buka Data (100 baris)", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
                     onClick = {
                         menuExpanded = false
                         onClick()
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("📋 Salin Nama Tabel", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
+                    text = { Text("Salin Nama Tabel", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
                     onClick = {
                         menuExpanded = false
                         copyToClipboard(table.name)
@@ -135,7 +138,7 @@ fun TableItemRow(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("⚡ Salin Kueri SELECT", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
+                    text = { Text("Salin Kueri SELECT", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
                     onClick = {
                         menuExpanded = false
                         val sql = "SELECT * FROM ${table.name} LIMIT 100;"
@@ -144,7 +147,7 @@ fun TableItemRow(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("📜 Salin Template DDL", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
+                    text = { Text("Salin Template DDL", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary) },
                     onClick = {
                         menuExpanded = false
                         val ddl = if (table.columns.isNotEmpty()) {

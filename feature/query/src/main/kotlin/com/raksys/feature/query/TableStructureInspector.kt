@@ -88,7 +88,7 @@ fun TableStructureInspector(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "🛠️ Struktur: ${table.name}",
+                    text = "Struktur: ${table.name}",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = RaksysThemeColors.TextPrimary
@@ -138,7 +138,7 @@ fun TableStructureInspector(
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text("📋 Salin DDL", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary)
+                    Text("Salin DDL", fontSize = 11.sp, color = RaksysThemeColors.TextPrimary)
                 }
 
                 Button(
@@ -152,7 +152,7 @@ fun TableStructureInspector(
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text("📝 Salin Template INSERT", fontSize = 11.sp, color = Color.White)
+                    Text("Salin Template INSERT", fontSize = 11.sp, color = Color.White)
                 }
             }
         }
@@ -267,14 +267,14 @@ private fun ColumnRow(index: Int, column: ColumnDefinition) {
         ) {
             if (column.isPrimaryKey) {
                 RaksysStatusBadge(
-                    text = "🔑 PK",
+                    text = "PK",
                     statusColor = RaksysThemeColors.Warning,
                     bgColor = RaksysThemeColors.WarningBg
                 )
             }
             column.foreignKey?.let { fk ->
                 RaksysStatusBadge(
-                    text = "🔗 ➔ ${fk.referencedTable}.${fk.referencedColumn}",
+                    text = "➔ ${fk.referencedTable}.${fk.referencedColumn}",
                     statusColor = RaksysThemeColors.Info,
                     bgColor = RaksysThemeColors.InfoBg
                 )

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
 import com.raksys.core.model.QueryResult
+import com.raksys.core.ui.SearchIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.TableGridIcon
@@ -175,7 +176,7 @@ fun DataGrid(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔍", fontSize = 11.sp)
+                    SearchIcon(color = RaksysThemeColors.TextMuted, size = 12.dp)
                     Spacer(modifier = Modifier.width(4.dp))
                     BasicTextField(
                         value = filterQuery,
@@ -222,7 +223,7 @@ fun DataGrid(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                         modifier = Modifier.height(24.dp)
                     ) {
-                        Text("📋 Salin Sel", fontSize = 11.sp)
+                        Text("Salin Sel", fontSize = 11.sp)
                     }
                 }
 

@@ -145,7 +145,7 @@ fun QueryEditor(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "⚡ SQL Console",
+                        text = "SQL Console",
                         fontSize = 11.sp,
                         fontWeight = if (isConsole) FontWeight.Bold else FontWeight.Normal,
                         color = if (isConsole) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
@@ -171,7 +171,7 @@ fun QueryEditor(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "📋 Data: ${table.name}",
+                            text = "Data: ${table.name}",
                             fontSize = 11.sp,
                             fontWeight = if (isTable) FontWeight.Bold else FontWeight.Normal,
                             color = if (isTable) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
@@ -223,7 +223,7 @@ fun QueryEditor(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "📋 Data Tabel ($rowsCount)",
+                            text = "Data Tabel ($rowsCount)",
                             fontSize = 11.sp,
                             fontWeight = if (isData) FontWeight.Bold else FontWeight.Normal,
                             color = if (isData) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
@@ -239,7 +239,7 @@ fun QueryEditor(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "🛠️ Struktur Kolom & Kunci (${browsingTable.columns.size})",
+                            text = "Struktur Kolom & Kunci (${browsingTable.columns.size})",
                             fontSize = 11.sp,
                             fontWeight = if (isStructure) FontWeight.Bold else FontWeight.Normal,
                             color = if (isStructure) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary

@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +29,7 @@ import com.raksys.core.database.DocumentDatabaseDriver
 import com.raksys.core.database.KeyValueDriver
 import com.raksys.core.model.*
 import com.raksys.core.security.CredentialStore
+import com.raksys.core.ui.EyeIcon
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.ToastManager
@@ -200,7 +203,7 @@ fun ConnectionFormDialog(
                             onClick = onDismiss,
                             modifier = Modifier.size(26.dp)
                         ) {
-                            Text("✕", fontSize = 13.sp, color = RaksysThemeColors.TextMuted)
+                            Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup" }, fontSize = 13.sp, color = RaksysThemeColors.TextMuted)
                         }
                     }
 
@@ -441,8 +444,8 @@ fun ConnectionFormDialog(
                                     singleLine = true,
                                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                     trailingIcon = {
-                                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }, modifier = Modifier.size(24.dp)) {
-                                            Text(if (isPasswordVisible) "👁" else "👁‍🗨", fontSize = 12.sp)
+                                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }, modifier = Modifier.size(28.dp)) {
+                                            EyeIcon(color = RaksysThemeColors.TextSecondary, slashed = isPasswordVisible, contentDescription = if (isPasswordVisible) "Sembunyikan password" else "Tampilkan password")
                                         }
                                     },
                                     textStyle = TextStyle(fontSize = 13.sp, color = RaksysThemeColors.TextPrimary),
@@ -575,8 +578,8 @@ fun ConnectionFormDialog(
                                     singleLine = true,
                                     visualTransformation = if (isSshPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                     trailingIcon = {
-                                        IconButton(onClick = { isSshPasswordVisible = !isSshPasswordVisible }, modifier = Modifier.size(24.dp)) {
-                                            Text(if (isSshPasswordVisible) "👁" else "👁‍🗨", fontSize = 12.sp)
+                                        IconButton(onClick = { isSshPasswordVisible = !isSshPasswordVisible }, modifier = Modifier.size(28.dp)) {
+                                            EyeIcon(color = RaksysThemeColors.TextSecondary, slashed = isSshPasswordVisible, contentDescription = if (isSshPasswordVisible) "Sembunyikan password SSH" else "Tampilkan password SSH")
                                         }
                                     },
                                     textStyle = TextStyle(fontSize = 13.sp, color = RaksysThemeColors.TextPrimary),
@@ -611,7 +614,7 @@ fun ConnectionFormDialog(
                                 .padding(horizontal = 14.dp, vertical = 10.dp)
                         ) {
                             Text(
-                                text = "⚠️ $validationError",
+                                text = "$validationError",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFFFCA5A5)
@@ -707,7 +710,7 @@ fun ConnectionFormDialog(
                             modifier = Modifier.height(34.dp)
                         ) {
                             Text(
-                                if (inlineTestState is UiState.Loading) "Menguji..." else "⚡ Uji Koneksi",
+                                if (inlineTestState is UiState.Loading) "Menguji..." else "Uji Koneksi",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold
                             )

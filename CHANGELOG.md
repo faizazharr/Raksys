@@ -10,6 +10,8 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 - **Native menu bar** (File / View / Go) with platform-correct shortcuts (`⌘` on macOS, `Ctrl` elsewhere); shortcut hints in the status bar, toolbar, and command palette follow the platform.
 - **Hover and keyboard focus** feedback on tabs, connection cards, table rows, collections, and Redis keys.
 - **Vector icons** for the Query / ERD / Permissions tabs and the sidebar toggle, replacing emoji.
+- **Screen-reader labels** on every icon-only button (refresh, copy, edit, delete, show/hide password, close, zoom, sidebar toggle, row menu). Icon-only buttons are now 28 dp (desktop default) instead of 20–24 dp.
+- **Emoji removed from the UI.** Decorative emoji in labels are gone (the text already says what the button does); icon-only uses are replaced by the new vector set in `ActionIcons.kt` (search, refresh, eye, copy, edit, trash, key, link, lock, user, plus, document, table). Empty states, the command palette, and the ERD key/foreign-key markers use the same icons.
 - **Query menu > Run SQL** and vector icons (Run, Format, History) in the SQL toolbar; the Run button is now `SuccessFill` (5.5:1 with white text, was 3.8:1).
 - **macOS type scale** for Material text styles (Body 13, Callout 12, Caption 11, Title 15 / 17); nothing below 11 sp.
 - **Environment edge**: a 2 dp window-wide line in the active connection's environment color.

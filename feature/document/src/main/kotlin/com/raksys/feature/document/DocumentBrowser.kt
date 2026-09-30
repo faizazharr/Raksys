@@ -176,11 +176,11 @@ fun DocumentCollectionList(
             IconButton(
                 onClick = { scope.launch { presenter.onEvent(DocumentEvent.LoadCollections(profile)) } },
                 modifier = Modifier
-                    .size(26.dp)
+                    .size(28.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(RaksysThemeColors.SurfaceElevated)
             ) {
-                Text("🔄", fontSize = 11.sp)
+                RefreshIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp, contentDescription = "Muat ulang daftar collection")
             }
         }
 
@@ -217,7 +217,7 @@ fun DocumentCollectionList(
                 is UiState.Success -> {
                     val filtered = current.data.filter { filterText.isBlank() || it.name.contains(filterText, ignoreCase = true) }
                     if (filtered.isEmpty()) {
-                        RaksysEmptyState(iconLabel = "🍃", title = "Tidak Ada Collection", description = if (filterText.isBlank()) "Database ini belum punya collection." else "Tidak ada collection cocok.")
+                        RaksysEmptyState(iconContent = { MongodbLogo(color = RaksysThemeColors.MongodbColor, size = 32.dp) }, title = "Tidak Ada Collection", description = if (filterText.isBlank()) "Database ini belum punya collection." else "Tidak ada collection cocok.")
                     } else {
                         LazyColumn(contentPadding = PaddingValues(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             items(filtered, key = { it.name }) { collection ->
@@ -237,7 +237,7 @@ fun DocumentCollectionList(
                                         .padding(horizontal = 10.dp, vertical = 7.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("🗂️", fontSize = 12.sp)
+                                    TableIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = collection.name,
@@ -375,7 +375,7 @@ fun DocumentViewer(
                         .clip(RoundedCornerShape(5.dp))
                         .background(RaksysThemeColors.SurfaceElevated)
                 ) {
-                    Text("🔄", fontSize = 11.sp)
+                    RefreshIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp, contentDescription = "Muat ulang dokumen")
                 }
             }
         }
@@ -405,7 +405,7 @@ fun DocumentViewer(
 
                     if (filteredDocs.isEmpty()) {
                         RaksysEmptyState(
-                            iconLabel = "📭",
+                            iconContent = { DocumentIcon(color = RaksysThemeColors.TextSecondary, size = 30.dp) },
                             title = "Collection Kosong",
                             description = if (searchDocQuery.isBlank()) "'$collection' tidak punya dokumen." else "Tidak ada dokumen yang cocok dengan filter."
                         )
@@ -442,7 +442,7 @@ fun DocumentViewer(
                                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                             modifier = Modifier.height(24.dp)
                                         ) {
-                                            Text("📋 Salin JSON", fontSize = 11.sp)
+                                            Text("Salin JSON", fontSize = 11.sp)
                                         }
                                     }
 
@@ -510,7 +510,7 @@ fun AddDocumentDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("➕ Tambah Dokumen: ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
+                Text("Tambah Dokumen: ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
                 Text(collection, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = RaksysThemeColors.Primary)
             }
         },

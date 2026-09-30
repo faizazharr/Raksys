@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.raksys.core.ui.ShieldIcon
 import com.raksys.core.ui.RaksysThemeColors
 
 fun isDestructiveSql(sql: String): Boolean {
@@ -49,7 +50,7 @@ fun ProductionSafeguardDialog(
                         .border(1.dp, RaksysThemeColors.EnvProd.copy(alpha = 0.5f), RoundedCornerShape(6.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🛡️", fontSize = 14.sp)
+                    ShieldIcon(color = RaksysThemeColors.EnvProdText, size = 16.dp)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {

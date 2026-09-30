@@ -134,7 +134,7 @@ fun ConnectionListScreen(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text("⚡ Buat DB Lokal", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.Primary)
+                    Text("Buat DB Lokal", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.Primary)
                 }
 
                 Button(
@@ -163,7 +163,7 @@ fun ConnectionListScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("🔍 Filter koneksi...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
+                    placeholder = { Text("Filter koneksi...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
                     singleLine = true,
                     shape = RoundedCornerShape(6.dp),
                     colors = OutlinedTextFieldDefaults.colors(

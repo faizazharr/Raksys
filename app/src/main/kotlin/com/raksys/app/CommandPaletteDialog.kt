@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +28,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.TableSchema
+import com.raksys.core.ui.SearchIcon
+import com.raksys.core.ui.SidebarIcon
+import com.raksys.core.ui.PlusIcon
+import com.raksys.core.ui.DatabaseIcon
+import com.raksys.core.ui.ShieldIcon
+import com.raksys.core.ui.ErdIcon
+import com.raksys.core.ui.QueryIcon
+import com.raksys.core.ui.TableIcon
 import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.RaksysPlatform
@@ -42,7 +52,7 @@ data class PaletteItem(
     val title: String,
     val subtitle: String? = null,
     val category: CommandCategory,
-    val icon: String,
+    val icon: @Composable () -> Unit,
     val onExecute: () -> Unit,
 )
 
@@ -75,7 +85,7 @@ fun CommandPaletteDialog(
                     title = table.name,
                     subtitle = "${table.columns.size} kolom • Buka data tabel",
                     category = CommandCategory.TABLE,
-                    icon = "⊞",
+                    icon = { TableIcon(color = RaksysThemeColors.TextSecondary) },
                     onExecute = { onSelectTable(table) }
                 )
             )
@@ -89,7 +99,7 @@ fun CommandPaletteDialog(
                     title = "Buka SQL Console & Skema",
                     subtitle = "Tulis dan jalankan kueri SQL manual serta eksplorasi skema",
                     category = CommandCategory.NAVIGATION,
-                    icon = "⚡",
+                    icon = { QueryIcon(color = RaksysThemeColors.TextSecondary) },
                     onExecute = { onSelectTab(RelationalTab.QUERY) }
                 )
             )
@@ -99,7 +109,7 @@ fun CommandPaletteDialog(
                     title = "Buka Entity Relationship Diagram (ERD)",
                     subtitle = "Visualisasi relasi skema dan Bézier edge",
                     category = CommandCategory.NAVIGATION,
-                    icon = "🗺️",
+                    icon = { ErdIcon(color = RaksysThemeColors.TextSecondary) },
                     onExecute = { onSelectTab(RelationalTab.ERD) }
                 )
             )
@@ -109,7 +119,7 @@ fun CommandPaletteDialog(
                     title = "Buka Matriks Hak Akses (Permissions)",
                     subtitle = "Kelola izin SELECT, INSERT, UPDATE, DELETE",
                     category = CommandCategory.NAVIGATION,
-                    icon = "🔐",
+                    icon = { ShieldIcon(color = RaksysThemeColors.TextSecondary) },
                     onExecute = { onSelectTab(RelationalTab.PERMISSIONS) }
                 )
             )
@@ -124,7 +134,7 @@ fun CommandPaletteDialog(
                     title = conn.name,
                     subtitle = "${conn.dbType.name} • ${conn.host}:${conn.port}${if (isCurrent) " (Aktif)" else ""}",
                     category = CommandCategory.CONNECTION,
-                    icon = "🔌",
+                    icon = { DatabaseIcon(color = RaksysThemeColors.TextSecondary) },
                     onExecute = { onSelectProfile(conn) }
                 )
             )
@@ -137,7 +147,7 @@ fun CommandPaletteDialog(
                 title = "Tambah Koneksi Baru",
                 subtitle = "Buka wizard setup database baru",
                 category = CommandCategory.ACTION,
-                icon = "➕",
+                icon = { PlusIcon(color = RaksysThemeColors.TextSecondary) },
                 onExecute = onNewConnection
             )
         )
@@ -147,7 +157,7 @@ fun CommandPaletteDialog(
                 title = "Toggle Sidebar Koneksi (${RaksysPlatform.shortcut("B")})",
                 subtitle = "Tampilkan atau sembunyikan sidebar",
                 category = CommandCategory.ACTION,
-                icon = "◧",
+                icon = { SidebarIcon(color = RaksysThemeColors.TextSecondary, sidebarOpen = true) },
                 onExecute = onToggleSidebar
             )
         )
@@ -225,7 +235,7 @@ fun CommandPaletteDialog(
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔍", fontSize = 14.sp)
+                    SearchIcon(color = RaksysThemeColors.TextMuted, size = 14.dp)
                     Spacer(modifier = Modifier.width(10.dp))
                     OutlinedTextField(
                         value = query,
@@ -248,7 +258,7 @@ fun CommandPaletteDialog(
                     )
                     if (query.isNotEmpty()) {
                         IconButton(onClick = { query = "" }, modifier = Modifier.size(22.dp)) {
-                            Text("✕", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
+                            Text("✕", modifier = Modifier.semantics { contentDescription = "Hapus pencarian" }, fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                         }
                     }
                     Box(
@@ -307,7 +317,7 @@ fun CommandPaletteDialog(
                                     .padding(horizontal = 10.dp, vertical = 7.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(item.icon, fontSize = 13.sp)
+                                item.icon()
                                 Spacer(modifier = Modifier.width(10.dp))
 
                                 Column(modifier = Modifier.weight(1f)) {

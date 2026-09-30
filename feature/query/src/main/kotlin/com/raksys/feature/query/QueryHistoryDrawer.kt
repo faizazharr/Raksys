@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +64,7 @@ fun QueryHistoryDrawer(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "📜 Riwayat Kueri",
+                    text = "Riwayat Kueri",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = RaksysThemeColors.TextPrimary
@@ -98,7 +100,7 @@ fun QueryHistoryDrawer(
                     onClick = onClose,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Text("✕", fontSize = 11.sp, color = RaksysThemeColors.TextSecondary)
+                    Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup riwayat kueri" }, fontSize = 11.sp, color = RaksysThemeColors.TextSecondary)
                 }
             }
         }
@@ -231,7 +233,7 @@ fun QueryHistoryDrawer(
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     modifier = Modifier.height(24.dp)
                                 ) {
-                                    Text("📋 Salin", fontSize = 11.sp)
+                                    Text("Salin", fontSize = 11.sp)
                                 }
 
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -246,7 +248,7 @@ fun QueryHistoryDrawer(
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     modifier = Modifier.height(24.dp)
                                 ) {
-                                    Text("⚡ Muat ke Editor", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Text("Muat ke Editor", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

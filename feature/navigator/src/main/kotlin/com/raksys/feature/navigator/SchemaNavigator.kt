@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.TableSchema
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.RefreshIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysErrorState
 import com.raksys.core.ui.RaksysLoadingState
@@ -74,11 +75,11 @@ fun SchemaNavigator(
                 IconButton(
                     onClick = { scope.launch { presenter.onEvent(NavigatorEvent.Load(profile, forceRefresh = true)) } },
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(28.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(RaksysThemeColors.SurfaceElevated)
                 ) {
-                    Text("🔄", fontSize = 11.sp)
+                    RefreshIcon(color = RaksysThemeColors.TextSecondary, size = 13.dp, contentDescription = "Muat ulang skema tabel")
                 }
             }
 

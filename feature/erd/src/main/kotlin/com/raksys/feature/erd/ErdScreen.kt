@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.ErdIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysErrorState
 import com.raksys.core.ui.RaksysLoadingState
@@ -36,7 +37,7 @@ fun ErdScreen(profile: ConnectionProfile, modifier: Modifier = Modifier) {
             )
             is UiState.Success -> {
                 if (current.data.isEmpty()) {
-                    RaksysEmptyState(iconLabel = "🗺️", title = "Belum Ada Tabel", description = "Database ini belum punya tabel untuk digambar ERD-nya.")
+                    RaksysEmptyState(iconContent = { ErdIcon(color = RaksysThemeColors.TextSecondary, size = 30.dp) }, title = "Belum Ada Tabel", description = "Database ini belum punya tabel untuk digambar ERD-nya.")
                 } else {
                     ErdCanvas(tables = current.data, modifier = Modifier.fillMaxSize())
                 }

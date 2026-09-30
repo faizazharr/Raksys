@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -26,6 +28,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.TableSchema
+import com.raksys.core.ui.LinkIcon
+import com.raksys.core.ui.KeyIcon
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.ToastManager
 import java.awt.Toolkit
@@ -206,7 +210,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = erdSearchQuery,
                 onValueChange = { erdSearchQuery = it },
-                placeholder = { Text("🔍 Cari tabel di ERD...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
+                placeholder = { Text("Cari tabel di ERD...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
                 singleLine = true,
                 shape = RoundedCornerShape(6.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -235,7 +239,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                     onClick = { erdSearchQuery = "" },
                     modifier = Modifier.size(20.dp)
                 ) {
-                    Text("✕", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
+                    Text("✕", modifier = Modifier.semantics { contentDescription = "Hapus pencarian" }, fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                 }
             }
         }
@@ -257,7 +261,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 onClick = { zoomScale = (zoomScale - 0.15f).coerceAtLeast(0.4f) },
                 modifier = Modifier.size(28.dp)
             ) {
-                Text("－", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
+                Text("－", modifier = Modifier.semantics { contentDescription = "Perkecil" }, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
             }
 
             Box(
@@ -279,7 +283,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 onClick = { zoomScale = (zoomScale + 0.15f).coerceAtMost(2.2f) },
                 modifier = Modifier.size(28.dp)
             ) {
-                Text("＋", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
+                Text("＋", modifier = Modifier.semantics { contentDescription = "Perbesar" }, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
             }
 
             Box(modifier = Modifier.height(16.dp).width(1.dp).background(RaksysThemeColors.Border))
@@ -305,7 +309,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 modifier = Modifier.height(26.dp)
             ) {
-                Text("📋 Export Mermaid", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Export Mermaid", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }
@@ -367,12 +371,11 @@ private fun TableErdCard(
                         .padding(vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val marker = when {
-                        column.isPrimaryKey -> "🔑"
-                        column.foreignKey != null -> "🔗"
-                        else -> "•"
+                    when {
+                        column.isPrimaryKey -> KeyIcon(color = RaksysThemeColors.Warning, size = 11.dp, contentDescription = "Primary key")
+                        column.foreignKey != null -> LinkIcon(color = RaksysThemeColors.Info, size = 11.dp, contentDescription = "Foreign key")
+                        else -> Text("•", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                     }
-                    Text(marker, fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
                         text = column.name,
