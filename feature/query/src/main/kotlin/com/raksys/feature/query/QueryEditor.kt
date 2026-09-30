@@ -52,6 +52,8 @@ fun QueryEditor(
     var isHistoryOpen by remember { mutableStateOf(false) }
     var pendingDestructiveSql by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(profile.id) { presenter.onEvent(QueryEvent.UseProfile(profile.id)) }
+
     val triggerExecution: (String) -> Unit = { rawSql ->
         val sql = rawSql.trim()
         if (profile.environment == com.raksys.core.model.EnvironmentType.PRODUCTION && isDestructiveSql(sql)) {

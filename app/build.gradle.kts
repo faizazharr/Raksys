@@ -38,6 +38,9 @@ compose.desktop {
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe,
             )
             packageName = "Raksys"
+            // A database client sits idle most of the time: a small heap and the serial collector keep
+            // its resident memory low. Raise -Xmx if you routinely browse very large result sets.
+            jvmArgs += listOf("-Xmx1g", "-XX:+UseSerialGC")
             packageVersion = "1.0.0"
         }
     }

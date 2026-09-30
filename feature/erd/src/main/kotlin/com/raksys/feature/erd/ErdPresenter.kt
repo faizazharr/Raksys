@@ -14,7 +14,7 @@ class ErdPresenter(private val driver: DatabaseDriver) {
         when (event) {
             is ErdEvent.Load -> {
                 _state.value = UiState.Loading
-                driver.listTables(event.profile)
+                driver.listTables(event.profile, event.forceRefresh)
                     .onSuccess { _state.value = UiState.Success(it) }
                     .onFailure { _state.value = UiState.Error(it.message ?: "Failed to load schema") }
             }

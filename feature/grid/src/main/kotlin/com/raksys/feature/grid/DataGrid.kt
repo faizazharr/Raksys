@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,11 +92,20 @@ fun DataGrid(
     var filterQuery by remember { mutableStateOf("") }
     var sortState by remember { mutableStateOf<Pair<Int, GridSortDirection>?>(null) }
 
-    val filteredRows = remember(result.rows, filterQuery) {
-        if (filterQuery.isBlank()) result.rows
+    // Filtering scans every cell of up to 10,000 rows, so wait for a short pause in typing.
+    var appliedFilter by remember { mutableStateOf("") }
+    LaunchedEffect(filterQuery) {
+        if (filterQuery.isBlank()) appliedFilter = "" else {
+            delay(200)
+            appliedFilter = filterQuery
+        }
+    }
+
+    val filteredRows = remember(result.rows, appliedFilter) {
+        if (appliedFilter.isBlank()) result.rows
         else {
             result.rows.filter { row ->
-                row.any { it?.toString()?.contains(filterQuery, ignoreCase = true) == true }
+                row.any { it?.toString()?.contains(appliedFilter, ignoreCase = true) == true }
             }
         }
     }

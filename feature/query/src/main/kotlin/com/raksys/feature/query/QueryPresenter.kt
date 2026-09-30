@@ -23,14 +23,27 @@ class QueryPresenter(private val driver: DatabaseDriver) {
     private val _history = MutableStateFlow<List<QueryHistoryItem>>(emptyList())
     val history: StateFlow<List<QueryHistoryItem>> = _history
 
+    private var activeProfileId: String? = null
+
     suspend fun onEvent(event: QueryEvent) {
         when (event) {
+            is QueryEvent.UseProfile -> {
+                // The presenter is a singleton shared by every connection. Without this, connection A's
+                // result grid stays on screen after switching to connection B.
+                if (activeProfileId != event.profileId) {
+                    if (state.value is UiState.Loading) driver.cancel()
+                    _state.value = UiState.Idle
+                    activeProfileId = event.profileId
+                }
+            }
             is QueryEvent.Execute -> {
+                activeProfileId = event.profile.id
                 _state.value = UiState.Loading
                 val startTime = System.currentTimeMillis()
                 driver.executeQuery(event.profile, event.sql)
                     .onSuccess {
-                        _state.value = UiState.Success(it)
+                        // Ignore a late answer for a connection the user has already switched away from.
+                        if (activeProfileId == event.profile.id) _state.value = UiState.Success(it)
                         val item = QueryHistoryItem(
                             sql = event.sql,
                             timestamp = startTime,
@@ -42,7 +55,7 @@ class QueryPresenter(private val driver: DatabaseDriver) {
                     }
                     .onFailure {
                         val msg = it.message ?: "Query failed"
-                        _state.value = UiState.Error(msg)
+                        if (activeProfileId == event.profile.id) _state.value = UiState.Error(msg)
                         val item = QueryHistoryItem(
                             sql = event.sql,
                             timestamp = startTime,

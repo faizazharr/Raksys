@@ -32,7 +32,7 @@ fun ErdScreen(profile: ConnectionProfile, modifier: Modifier = Modifier) {
             is UiState.Loading -> RaksysLoadingState(title = "Membangun ERD...", subtitle = "Membaca skema dan foreign key dari ${profile.name}")
             is UiState.Error -> RaksysErrorState(
                 errorMessage = current.message,
-                onRetry = { scope.launch { presenter.onEvent(ErdEvent.Load(profile)) } },
+                onRetry = { scope.launch { presenter.onEvent(ErdEvent.Load(profile, forceRefresh = true)) } },
             )
             is UiState.Success -> {
                 if (current.data.isEmpty()) {

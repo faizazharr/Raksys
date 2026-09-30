@@ -72,7 +72,7 @@ fun SchemaNavigator(
                 }
 
                 IconButton(
-                    onClick = { scope.launch { presenter.onEvent(NavigatorEvent.Load(profile)) } },
+                    onClick = { scope.launch { presenter.onEvent(NavigatorEvent.Load(profile, forceRefresh = true)) } },
                     modifier = Modifier
                         .size(24.dp)
                         .clip(RoundedCornerShape(5.dp))
@@ -119,7 +119,7 @@ fun SchemaNavigator(
                     RaksysErrorState(
                         title = "Gagal Membaca Skema",
                         errorMessage = current.message,
-                        onRetry = { scope.launch { presenter.onEvent(NavigatorEvent.Load(profile)) } }
+                        onRetry = { scope.launch { presenter.onEvent(NavigatorEvent.Load(profile, forceRefresh = true)) } }
                     )
                 }
 

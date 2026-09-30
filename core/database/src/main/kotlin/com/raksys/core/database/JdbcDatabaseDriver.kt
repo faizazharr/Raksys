@@ -16,6 +16,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 private const val MAX_ROWS = 10_000
 private const val QUERY_TIMEOUT_SECONDS = 30
+private const val SCHEMA_CACHE_TTL_MS = 5 * 60 * 1000L
+
+private val SCHEMA_CHANGING_SQL = Regex("""^\s*(CREATE|ALTER|DROP|RENAME)\b""", RegexOption.IGNORE_CASE)
+
+/** True for statements that can change the table/column layout, so a cached schema must be dropped. */
+internal fun isSchemaChangingSql(sql: String): Boolean = SCHEMA_CHANGING_SQL.containsMatchIn(sql)
+
+private class CachedSchema(val tables: List<TableSchema>, val loadedAt: Long = System.currentTimeMillis())
 
 internal fun jdbcUrl(profile: ConnectionProfile, resolvedHost: String, resolvedPort: Int): String {
     val sslSuffix = when {
@@ -38,6 +46,7 @@ class JdbcDatabaseDriver(
 ) : DatabaseDriver {
 
     private val pools = ConcurrentHashMap<String, HikariDataSource>()
+    private val schemaCache = ConcurrentHashMap<String, CachedSchema>()
     @Volatile private var activeStatement: Statement? = null
 
     private fun poolFor(profile: ConnectionProfile): HikariDataSource =
@@ -49,7 +58,11 @@ class JdbcDatabaseDriver(
                     jdbcUrl = jdbcUrl(profile, resolvedHost, resolvedPort)
                     username = profile.username.ifBlank { null }
                     this.password = password.ifBlank { null }
-                    maximumPoolSize = 5
+                    maximumPoolSize = 4
+                    // Keep no idle connections around: a desktop client is idle most of the time, and
+                    // every profile that was ever opened would otherwise hold a full pool on the server.
+                    minimumIdle = 0
+                    idleTimeout = 60_000
                     connectionTimeout = 10_000
                     validationTimeout = 5_000
                 }
@@ -65,29 +78,66 @@ class JdbcDatabaseDriver(
             }
         }
 
-    override suspend fun listTables(profile: ConnectionProfile): Result<List<TableSchema>> =
+    override suspend fun listTables(profile: ConnectionProfile, forceRefresh: Boolean): Result<List<TableSchema>> =
         withContext(Dispatchers.IO) {
+            val cached = schemaCache[profile.id]
+            if (!forceRefresh && cached != null && System.currentTimeMillis() - cached.loadedAt < SCHEMA_CACHE_TTL_MS) {
+                return@withContext Result.success(cached.tables)
+            }
             runCatching {
                 poolFor(profile).connection.use { conn ->
                     val metadata = conn.metaData
-                    val tables = mutableListOf<TableSchema>()
+                    val tableNames = mutableListOf<String>()
                     metadata.getTables(conn.catalog, conn.schema, "%", arrayOf("TABLE")).use { rs ->
-                        while (rs.next()) {
-                            val tableName = rs.getString("TABLE_NAME")
-                            tables += TableSchema(tableName, columnsFor(metadata, conn.catalog, conn.schema, tableName))
-                        }
+                        while (rs.next()) tableNames += rs.getString("TABLE_NAME")
                     }
-                    tables
+                    // One getColumns call for the whole schema instead of one per table (this also avoids
+                    // treating "_" in a table name as a LIKE wildcard that pulls in another table's columns).
+                    val columnsByTable = columnsByTable(metadata, conn.catalog, conn.schema)
+                    tableNames.map { name ->
+                        val (primaryKeys, foreignKeys) = keysFor(metadata, conn.catalog, conn.schema, name)
+                        TableSchema(
+                            name = name,
+                            columns = columnsByTable[name].orEmpty().map { col ->
+                                col.copy(
+                                    isPrimaryKey = col.name in primaryKeys,
+                                    foreignKey = foreignKeys[col.name],
+                                )
+                            },
+                        )
+                    }
                 }
-            }
+            }.onSuccess { schemaCache[profile.id] = CachedSchema(it) }
         }
 
-    private fun columnsFor(
+    private fun columnsByTable(
+        metadata: java.sql.DatabaseMetaData,
+        catalog: String?,
+        schema: String?,
+    ): Map<String, List<ColumnDefinition>> {
+        val result = LinkedHashMap<String, MutableList<ColumnDefinition>>()
+        metadata.getColumns(catalog, schema, "%", "%").use { rs ->
+            while (rs.next()) {
+                val table = rs.getString("TABLE_NAME")
+                result.getOrPut(table) { mutableListOf() } += ColumnDefinition(
+                    name = rs.getString("COLUMN_NAME"),
+                    type = rs.getString("TYPE_NAME"),
+                    nullable = rs.getInt("NULLABLE") == java.sql.DatabaseMetaData.columnNullable,
+                    isPrimaryKey = false,
+                    defaultValue = rs.getString("COLUMN_DEF"),
+                    foreignKey = null,
+                )
+            }
+        }
+        return result
+    }
+
+    private fun keysFor(
         metadata: java.sql.DatabaseMetaData,
         catalog: String?,
         schema: String?,
         tableName: String,
-    ): List<ColumnDefinition> {
+    ): Pair<Set<String>, Map<String, ForeignKeyRef>> {
         val primaryKeys = mutableSetOf<String>()
         metadata.getPrimaryKeys(catalog, schema, tableName).use { rs ->
             while (rs.next()) primaryKeys += rs.getString("COLUMN_NAME")
@@ -101,25 +151,14 @@ class JdbcDatabaseDriver(
                 )
             }
         }
-        val columns = mutableListOf<ColumnDefinition>()
-        metadata.getColumns(catalog, schema, tableName, "%").use { rs ->
-            while (rs.next()) {
-                val name = rs.getString("COLUMN_NAME")
-                columns += ColumnDefinition(
-                    name = name,
-                    type = rs.getString("TYPE_NAME"),
-                    nullable = rs.getInt("NULLABLE") == java.sql.DatabaseMetaData.columnNullable,
-                    isPrimaryKey = name in primaryKeys,
-                    defaultValue = rs.getString("COLUMN_DEF"),
-                    foreignKey = foreignKeys[name],
-                )
-            }
-        }
-        return columns
+        return primaryKeys to foreignKeys
     }
 
     override suspend fun executeQuery(profile: ConnectionProfile, sql: String): Result<QueryResult> =
         withContext(Dispatchers.IO) {
+            // Dropped up front, not after success: some drivers report DDL run through executeQuery
+            // as an error even though it took effect.
+            if (isSchemaChangingSql(sql)) schemaCache.remove(profile.id)
             runCatching {
                 val startedAt = System.currentTimeMillis()
                 poolFor(profile).connection.use { conn ->
@@ -149,6 +188,7 @@ class JdbcDatabaseDriver(
 
     override suspend fun executeStatement(profile: ConnectionProfile, sql: String): Result<Unit> =
         withContext(Dispatchers.IO) {
+            if (isSchemaChangingSql(sql)) schemaCache.remove(profile.id)
             runCatching {
                 poolFor(profile).connection.use { conn ->
                     conn.createStatement().use { statement -> statement.execute(sql) }
@@ -199,6 +239,7 @@ class JdbcDatabaseDriver(
     }
 
     override fun invalidate(profileId: String) {
+        schemaCache.remove(profileId)
         pools.remove(profileId)?.close()
         sshTunnelManager.invalidate(profileId)
     }
@@ -206,6 +247,7 @@ class JdbcDatabaseDriver(
     override fun close() {
         pools.values.forEach { it.close() }
         pools.clear()
+        schemaCache.clear()
         sshTunnelManager.closeAll()
     }
 }
