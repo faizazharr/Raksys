@@ -1,5 +1,10 @@
 package com.raksys.feature.erd
 
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawWithContent
+import com.raksys.core.model.ColumnDefinition
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -13,7 +18,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -85,22 +89,29 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
     val edges = remember(boxes) { computeErdEdges(boxes) }
 
     var zoomScale by remember { mutableStateOf(1f) }
-    var hoveredTableName by remember { mutableStateOf<String?>(null) }
+    // Hover changes on every mouse move between tables. It is kept as a State object and read only
+    // inside draw / layer blocks and per-card derived states, so hovering does NOT recompose the
+    // whole diagram (with 80 tables that used to cost more than a full CPU core).
+    val hoveredState = remember { mutableStateOf<String?>(null) }
+    val setHovered = remember { { name: String? -> hoveredState.value = name } }
     var erdSearchQuery by remember { mutableStateOf("") }
 
-    // Find all tables directly related to the hovered table
-    val relatedTableNames = remember(hoveredTableName, edges) {
-        val target = hoveredTableName
-        if (target == null) emptySet()
-        else {
-            val connected = mutableSetOf(target)
-            edges.forEach { edge ->
-                if (edge.fromTable == target) connected.add(edge.toTable)
-                if (edge.toTable == target) connected.add(edge.fromTable)
+    // Tables directly related to the hovered table.
+    val relatedState = remember(edges) {
+        derivedStateOf {
+            val target = hoveredState.value
+            if (target == null) emptySet()
+            else {
+                val connected = mutableSetOf(target)
+                edges.forEach { edge ->
+                    if (edge.fromTable == target) connected.add(edge.toTable)
+                    if (edge.toTable == target) connected.add(edge.fromTable)
+                }
+                connected
             }
-            connected
         }
     }
+    val searchState = rememberUpdatedState(erdSearchQuery)
 
     val totalWidthDp = ((boxes.maxOfOrNull { it.xDp + it.widthDp } ?: 0) + 80)
     val totalHeightDp = ((boxes.maxOfOrNull { it.yDp + it.heightDp } ?: 0) + 80)
@@ -131,6 +142,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
             ) {
                 // Smooth Bézier Edge Canvas
                 Canvas(modifier = Modifier.width(totalWidthDp.dp).height(totalHeightDp.dp)) {
+                    val hoveredTableName = hoveredState.value
                     edges.forEach { edge ->
                         val isHighlighted = hoveredTableName != null &&
                                 (edge.fromTable == hoveredTableName || edge.toTable == hoveredTableName)
@@ -171,27 +183,12 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 // Table Cards
                 boxes.forEach { box ->
                     key(box.table.name) {
-                        val isSearchMatch = erdSearchQuery.isNotBlank() && box.table.name.contains(erdSearchQuery, ignoreCase = true)
-                        val isTableHovered = hoveredTableName == box.table.name
-                        val isTableRelated = relatedTableNames.contains(box.table.name)
-
-                        val tableAlpha = when {
-                            erdSearchQuery.isNotBlank() && !isSearchMatch -> 0.25f
-                            hoveredTableName == null || isTableRelated || isSearchMatch -> 1.0f
-                            else -> 0.4f
-                        }
-
-                        TableErdCard(
-                            table = box.table,
-                            isHighlighted = isSearchMatch || isTableHovered || (hoveredTableName != null && isTableRelated),
-                            onHoverChange = { isHovered ->
-                                hoveredTableName = if (isHovered) box.table.name else null
-                            },
-                            modifier = Modifier
-                                .offset(x = box.xDp.dp, y = box.yDp.dp)
-                                .width(box.widthDp.dp)
-                                .height(box.heightDp.dp)
-                                .alpha(tableAlpha),
+                        ErdCardHost(
+                            box = box,
+                            hoveredState = hoveredState,
+                            relatedState = relatedState,
+                            searchState = searchState,
+                            setHovered = setHovered,
                         )
                     }
                 }
@@ -308,6 +305,62 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * One table on the canvas. It reads the shared hover / search states itself, through a per-card
+ * derived state, so a hover change recomposes only the few cards whose highlight actually changes.
+ * Dimming is applied in the graphics layer, which repaints without recomposing.
+ */
+@Composable
+private fun ErdCardHost(
+    box: TableLayoutBox,
+    hoveredState: State<String?>,
+    relatedState: State<Set<String>>,
+    searchState: State<String>,
+    setHovered: (String?) -> Unit,
+) {
+    val name = box.table.name
+    val isHighlighted by remember(name) {
+        derivedStateOf {
+            val hovered = hoveredState.value
+            val search = searchState.value
+            (search.isNotBlank() && name.contains(search, ignoreCase = true)) ||
+                hovered == name ||
+                (hovered != null && name in relatedState.value)
+        }
+    }
+    val onHoverChange = remember(name) { { hovered: Boolean -> setHovered(if (hovered) name else null) } }
+    val dimColor = RaksysThemeColors.Background
+
+    TableErdCard(
+        table = box.table,
+        isHighlighted = isHighlighted,
+        onHoverChange = onHoverChange,
+        modifier = Modifier
+            .offset(x = box.xDp.dp, y = box.yDp.dp)
+            .width(box.widthDp.dp)
+            .height(box.heightDp.dp)
+            // Dimming is a translucent wash drawn on top, not `alpha`: alpha turns each of the (many)
+            // cards into an offscreen layer and re-composites all of them on every hover change.
+            .drawWithContent {
+                drawContent()
+                val search = searchState.value
+                val hovered = hoveredState.value
+                val matches = search.isNotBlank() && name.contains(search, ignoreCase = true)
+                val visibility = when {
+                    search.isNotBlank() && !matches -> 0.25f
+                    hovered == null || name in relatedState.value || matches -> 1.0f
+                    else -> 0.4f
+                }
+                if (visibility < 1f) {
+                    drawRoundRect(
+                        color = dimColor.copy(alpha = 1f - visibility),
+                        cornerRadius = CornerRadius(8.dp.toPx()),
+                    )
+                }
+            },
+    )
+}
+
 @Composable
 private fun TableErdCard(
     table: TableSchema,
@@ -356,38 +409,58 @@ private fun TableErdCard(
             )
         }
         HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
-        LazyColumn(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-            items(table.columns, key = { it.name }) { column ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    when {
-                        column.isPrimaryKey -> KeyIcon(color = RaksysThemeColors.Warning, size = 11.dp, contentDescription = "Primary key")
-                        column.foreignKey != null -> LinkIcon(color = RaksysThemeColors.Info, size = 11.dp, contentDescription = "Foreign key")
-                        else -> Text("•", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
-                    }
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(
-                        text = column.name,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = if (column.isPrimaryKey) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = column.type,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = RaksysThemeColors.TextMuted,
-                        maxLines = 1,
-                    )
-                }
-            }
+        ErdColumns(table.columns)
+    }
+}
+
+/**
+ * Column rows of a card. A LazyColumn per card is costly to set up and there can be dozens of cards,
+ * so ordinary tables use a plain scrolling Column and only very wide tables stay lazy.
+ */
+@Composable
+private fun ErdColumns(columns: List<ColumnDefinition>) {
+    if (columns.size <= LAZY_COLUMN_THRESHOLD) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).verticalScroll(rememberScrollState())) {
+            columns.forEach { ErdColumnRow(it) }
         }
+    } else {
+        LazyColumn(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            items(columns, key = { it.name }) { ErdColumnRow(it) }
+        }
+    }
+}
+
+private const val LAZY_COLUMN_THRESHOLD = 40
+
+@Composable
+private fun ErdColumnRow(column: ColumnDefinition) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        when {
+            column.isPrimaryKey -> KeyIcon(color = RaksysThemeColors.Warning, size = 11.dp, contentDescription = "Primary key")
+            column.foreignKey != null -> LinkIcon(color = RaksysThemeColors.Info, size = 11.dp, contentDescription = "Foreign key")
+            else -> Text("•", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
+        }
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = column.name,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 11.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = if (column.isPrimaryKey) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = column.type,
+            fontSize = 11.sp,
+            fontFamily = FontFamily.Monospace,
+            color = RaksysThemeColors.TextMuted,
+            maxLines = 1,
+        )
     }
 }

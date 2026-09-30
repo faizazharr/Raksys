@@ -59,6 +59,96 @@ private fun copyToClipboard(text: String) {
     }
 }
 
+/** Longer text than this opens in the cell inspector when the cell is clicked. */
+private const val INSPECT_THRESHOLD = 35
+
+/** Cells never lay out more than this many characters; the full value is in the inspector. */
+private const val CELL_DISPLAY_LIMIT = 200
+
+@Composable
+private fun GridRow(
+    rowIndex: Int,
+    row: List<Any?>,
+    columnWidths: List<androidx.compose.ui.unit.Dp>,
+    isRowSelected: Boolean,
+    selectedColumn: Int?,
+    onCellClick: (rowIndex: Int, colIndex: Int, fullText: String) -> Unit,
+    onRowClick: (rowIndex: Int) -> Unit,
+) {
+    val rowBg = when {
+        isRowSelected -> RaksysThemeColors.PrimaryContainer.copy(alpha = 0.35f)
+        rowIndex % 2 == 0 -> RaksysThemeColors.Background
+        else -> RaksysThemeColors.Surface
+    }
+
+    Row(
+        modifier = Modifier
+            .background(rowBg)
+            .border(width = 0.5.dp, color = RaksysThemeColors.Border.copy(alpha = 0.35f))
+            .clickable { onRowClick(rowIndex) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(46.dp)
+                .padding(vertical = 5.dp, horizontal = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "${rowIndex + 1}",
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                color = if (isRowSelected) RaksysThemeColors.Primary else RaksysThemeColors.TextMuted
+            )
+        }
+
+        row.forEachIndexed { colIndex, cell ->
+            val colWidth = columnWidths.getOrElse(colIndex) { 150.dp }
+            val isCellSelected = selectedColumn == colIndex
+
+            Box(
+                modifier = Modifier
+                    .width(colWidth)
+                    .border(
+                        width = if (isCellSelected) 1.5.dp else 0.5.dp,
+                        color = if (isCellSelected) RaksysThemeColors.Primary else RaksysThemeColors.Border.copy(alpha = 0.25f)
+                    )
+                    .clickable { onCellClick(rowIndex, colIndex, cell?.toString() ?: "NULL") }
+                    .padding(vertical = 5.dp, horizontal = 8.dp)
+            ) {
+                if (cell == null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(RaksysThemeColors.SurfaceElevated)
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = "NULL",
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = RaksysThemeColors.TextMuted
+                        )
+                    }
+                } else {
+                    // Laying out a multi-megabyte string just to show one ellipsised line is what makes
+                    // scrolling stall on wide JSON / text columns, so only a prefix is handed to Text.
+                    val full = cell.toString()
+                    Text(
+                        text = if (full.length > CELL_DISPLAY_LIMIT) full.take(CELL_DISPLAY_LIMIT) + "…" else full,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (isRowSelected) RaksysThemeColors.TextPrimary else RaksysThemeColors.TextSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun GridActionButton(label: String, onClick: () -> Unit) {
     OutlinedButton(
@@ -347,89 +437,30 @@ fun DataGrid(
                 }
 
                 // Scrollable Rows
+                // Selection is handed to each row as plain values, so clicking a cell recomposes only the
+                // row that lost and the row that gained the selection instead of every visible row.
+                val onCellClick = remember(result) {
+                    { rowIndex: Int, colIndex: Int, fullText: String ->
+                        selectedRowIndex = rowIndex
+                        selectedCellCoord = Pair(rowIndex, colIndex)
+                        if (fullText.length > INSPECT_THRESHOLD) {
+                            inspectingCell = Pair(result.columns.getOrElse(colIndex) { "Column" }, fullText)
+                        }
+                    }
+                }
+                val onRowClick = remember { { rowIndex: Int -> selectedRowIndex = rowIndex } }
+
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(displayRows) { rowIndex, row ->
-                        val isRowSelected = selectedRowIndex == rowIndex
-                        val isEven = rowIndex % 2 == 0
-                        val rowBg = when {
-                            isRowSelected -> RaksysThemeColors.PrimaryContainer.copy(alpha = 0.35f)
-                            isEven -> RaksysThemeColors.Background
-                            else -> RaksysThemeColors.Surface
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .background(rowBg)
-                                .border(width = 0.5.dp, color = RaksysThemeColors.Border.copy(alpha = 0.35f))
-                                .clickable { selectedRowIndex = rowIndex },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Row Index
-                            Box(
-                                modifier = Modifier
-                                    .width(46.dp)
-                                    .padding(vertical = 5.dp, horizontal = 4.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "${rowIndex + 1}",
-                                    fontSize = 11.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = if (isRowSelected) RaksysThemeColors.Primary else RaksysThemeColors.TextMuted
-                                )
-                            }
-
-                            row.forEachIndexed { colIndex, cell ->
-                                val colWidth = columnWidths.getOrElse(colIndex) { 150.dp }
-                                val isCellSelected = selectedCellCoord == Pair(rowIndex, colIndex)
-                                val isNull = cell == null
-                                val cellText = cell?.toString() ?: "NULL"
-
-                                Box(
-                                    modifier = Modifier
-                                        .width(colWidth)
-                                        .border(
-                                            width = if (isCellSelected) 1.5.dp else 0.5.dp,
-                                            color = if (isCellSelected) RaksysThemeColors.Primary else RaksysThemeColors.Border.copy(alpha = 0.25f)
-                                        )
-                                        .clickable {
-                                            selectedRowIndex = rowIndex
-                                            selectedCellCoord = Pair(rowIndex, colIndex)
-                                            // Double click or long text inspection
-                                            if (cellText.length > 35) {
-                                                inspectingCell = Pair(result.columns.getOrElse(colIndex) { "Column" }, cellText)
-                                            }
-                                        }
-                                        .padding(vertical = 5.dp, horizontal = 8.dp)
-                                ) {
-                                    if (isNull) {
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(3.dp))
-                                                .background(RaksysThemeColors.SurfaceElevated)
-                                                .padding(horizontal = 4.dp, vertical = 1.dp)
-                                        ) {
-                                            Text(
-                                                text = "NULL",
-                                                fontSize = 10.sp,
-                                                fontFamily = FontFamily.Monospace,
-                                                fontWeight = FontWeight.Bold,
-                                                color = RaksysThemeColors.TextMuted
-                                            )
-                                        }
-                                    } else {
-                                        Text(
-                                            text = cellText,
-                                            fontSize = 11.sp,
-                                            fontFamily = FontFamily.Monospace,
-                                            color = if (isRowSelected) RaksysThemeColors.TextPrimary else RaksysThemeColors.TextSecondary,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        GridRow(
+                            rowIndex = rowIndex,
+                            row = row,
+                            columnWidths = columnWidths,
+                            isRowSelected = selectedRowIndex == rowIndex,
+                            selectedColumn = selectedCellCoord?.takeIf { it.first == rowIndex }?.second,
+                            onCellClick = onCellClick,
+                            onRowClick = onRowClick,
+                        )
                     }
                 }
             }

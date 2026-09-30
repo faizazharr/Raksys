@@ -91,14 +91,19 @@ class JdbcDatabaseDriver(
                     metadata.getTables(conn.catalog, conn.schema, "%", arrayOf("TABLE")).use { rs ->
                         while (rs.next()) tableNames += rs.getString("TABLE_NAME")
                     }
-                    // One getColumns call for the whole schema instead of one per table (this also avoids
-                    // treating "_" in a table name as a LIKE wildcard that pulls in another table's columns).
-                    val columnsByTable = columnsByTable(metadata, conn.catalog, conn.schema)
+                    // One getColumns call for the whole schema is much cheaper than one per table, but the
+                    // SQLite driver answers it with a compound SELECT that exceeds SQLite's term limit on
+                    // schemas with a few dozen tables. So SQLite reads per table, and any other engine
+                    // that rejects the bulk call falls back to per-table reads too.
+                    val bulk = if (profile.dbType == DbType.SQLITE) null
+                    else runCatching { readColumns(metadata, conn.catalog, conn.schema, "%") }.getOrNull()
                     tableNames.map { name ->
+                        val columns = bulk?.get(name)
+                            ?: readColumns(metadata, conn.catalog, conn.schema, escapeLikePattern(metadata, name))[name].orEmpty()
                         val (primaryKeys, foreignKeys) = keysFor(metadata, conn.catalog, conn.schema, name)
                         TableSchema(
                             name = name,
-                            columns = columnsByTable[name].orEmpty().map { col ->
+                            columns = columns.map { col ->
                                 col.copy(
                                     isPrimaryKey = col.name in primaryKeys,
                                     foreignKey = foreignKeys[col.name],
@@ -110,13 +115,15 @@ class JdbcDatabaseDriver(
             }.onSuccess { schemaCache[profile.id] = CachedSchema(it) }
         }
 
-    private fun columnsByTable(
+    /** Reads columns for every table matching [tablePattern], grouped by exact table name. */
+    private fun readColumns(
         metadata: java.sql.DatabaseMetaData,
         catalog: String?,
         schema: String?,
+        tablePattern: String,
     ): Map<String, List<ColumnDefinition>> {
         val result = LinkedHashMap<String, MutableList<ColumnDefinition>>()
-        metadata.getColumns(catalog, schema, "%", "%").use { rs ->
+        metadata.getColumns(catalog, schema, tablePattern, "%").use { rs ->
             while (rs.next()) {
                 val table = rs.getString("TABLE_NAME")
                 result.getOrPut(table) { mutableListOf() } += ColumnDefinition(
@@ -130,6 +137,13 @@ class JdbcDatabaseDriver(
             }
         }
         return result
+    }
+
+    /** JDBC metadata takes LIKE patterns, so escape `_` and `%` in a literal table name. */
+    private fun escapeLikePattern(metadata: java.sql.DatabaseMetaData, name: String): String {
+        val esc = metadata.searchStringEscape.orEmpty()
+        if (esc.isEmpty()) return name
+        return name.replace(esc, esc + esc).replace("_", esc + "_").replace("%", esc + "%")
     }
 
     private fun keysFor(
