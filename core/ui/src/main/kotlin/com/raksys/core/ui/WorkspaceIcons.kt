@@ -86,3 +86,39 @@ fun SidebarIcon(color: Color, sidebarOpen: Boolean, size: Dp = 14.dp, modifier: 
         drawLine(color, Offset(6.5f * u, 3f * u), Offset(6.5f * u, 13f * u), strokeWidth = 1.5f * u, cap = StrokeCap.Round)
     }
 }
+
+@Composable
+fun PlayIcon(color: Color, size: Dp = 14.dp, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(size)) {
+        val u = this.size.width / 16f
+        val tri = Path().apply {
+            moveTo(4.5f * u, 2.5f * u); lineTo(13f * u, 8f * u); lineTo(4.5f * u, 13.5f * u); close()
+        }
+        drawPath(tri, color)
+    }
+}
+
+/** "Format": four left-aligned lines of alternating length. */
+@Composable
+fun FormatIcon(color: Color, size: Dp = 14.dp, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(size)) {
+        val u = this.size.width / 16f
+        val w = 1.5f * u
+        drawLine(color, Offset(2f * u, 3f * u), Offset(14f * u, 3f * u), strokeWidth = w, cap = StrokeCap.Round)
+        drawLine(color, Offset(2f * u, 6.5f * u), Offset(10f * u, 6.5f * u), strokeWidth = w, cap = StrokeCap.Round)
+        drawLine(color, Offset(2f * u, 10f * u), Offset(14f * u, 10f * u), strokeWidth = w, cap = StrokeCap.Round)
+        drawLine(color, Offset(2f * u, 13.5f * u), Offset(8f * u, 13.5f * u), strokeWidth = w, cap = StrokeCap.Round)
+    }
+}
+
+/** "History": a clock face with a counter-clockwise arrow tail. */
+@Composable
+fun HistoryIcon(color: Color, size: Dp = 14.dp, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(size)) {
+        val u = this.size.width / 16f
+        val st = stroke(1.5f * u)
+        drawCircle(color, radius = 6f * u, center = Offset(8f * u, 8f * u), style = st)
+        val hands = Path().apply { moveTo(8f * u, 4.5f * u); lineTo(8f * u, 8f * u); lineTo(10.5f * u, 9.5f * u) }
+        drawPath(hands, color, style = st)
+    }
+}

@@ -234,6 +234,14 @@ fun main() {
                             onClick = { isCommandPaletteOpen = !isCommandPaletteOpen },
                         )
                     }
+                    Menu("Query") {
+                        // ⌘↵ / Ctrl+↵ is handled by the SQL editor itself, so no accelerator is registered here.
+                        Item(
+                            "Run SQL",
+                            enabled = isRelational && workspaceTab == RelationalTab.QUERY,
+                            onClick = { RaksysCommands.requestRunQuery() },
+                        )
+                    }
                     Menu("Go") {
                         Item(
                             "Query Editor",

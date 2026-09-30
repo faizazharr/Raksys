@@ -10,6 +10,8 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 - **Native menu bar** (File / View / Go) with platform-correct shortcuts (`⌘` on macOS, `Ctrl` elsewhere); shortcut hints in the status bar, toolbar, and command palette follow the platform.
 - **Hover and keyboard focus** feedback on tabs, connection cards, table rows, collections, and Redis keys.
 - **Vector icons** for the Query / ERD / Permissions tabs and the sidebar toggle, replacing emoji.
+- **Query menu > Run SQL** and vector icons (Run, Format, History) in the SQL toolbar; the Run button is now `SuccessFill` (5.5:1 with white text, was 3.8:1).
+- **macOS type scale** for Material text styles (Body 13, Callout 12, Caption 11, Title 15 / 17); nothing below 11 sp.
 - **Environment edge**: a 2 dp window-wide line in the active connection's environment color.
 
 ### Documentation

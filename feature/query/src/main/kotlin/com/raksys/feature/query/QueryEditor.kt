@@ -70,6 +70,15 @@ fun QueryEditor(
         )
     }
 
+    // "Query > Run SQL" in the menu bar. Only react to ticks that happen while this screen is shown.
+    val runTick = RaksysCommands.runQueryTick
+    val initialRunTick = remember { runTick }
+    LaunchedEffect(runTick) {
+        if (runTick != initialRunTick && activeView == QueryWorkspaceView.CONSOLE && state !is UiState.Loading) {
+            triggerExecution(textArea.text)
+        }
+    }
+
     // Connect textArea execution callback
     LaunchedEffect(Unit) {
         textArea.bindExecutionShortcut {

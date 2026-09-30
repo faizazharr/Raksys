@@ -1,9 +1,13 @@
 package com.raksys.core.ui
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 object RaksysThemeColors {
     // Professional Studio Color Palette (Slate / Deep Charcoal with high readability)
@@ -29,6 +33,8 @@ object RaksysThemeColors {
     val Success = Color(0xFF34D399)
     val SuccessBg = Color(0xFF0D3325)
     val SuccessBorder = Color(0xFF059669)
+    // Filled positive control that carries white text (5.5:1).
+    val SuccessFill = Color(0xFF047857)
 
     val Error = Color(0xFFF87171)
     val ErrorBg = Color(0xFF381A1B)
@@ -69,6 +75,24 @@ object RaksysThemeColors {
     val SplitterHover = Color(0xFF4F8CF6)
 }
 
+/**
+ * macOS text styles (HIG › Typography): Body 13, Callout 12, Caption 11, Title 3 15, Title 2 17.
+ * Nothing below 11 sp; system default font, regular / semibold weights only.
+ */
+val RaksysTypography = Typography(
+    displaySmall = TextStyle(fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold),
+    headlineSmall = TextStyle(fontSize = 22.sp, lineHeight = 26.sp, fontWeight = FontWeight.Bold),
+    titleLarge = TextStyle(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
+    titleMedium = TextStyle(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
+    titleSmall = TextStyle(fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold),
+    bodyLarge = TextStyle(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Normal),
+    bodyMedium = TextStyle(fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Normal),
+    bodySmall = TextStyle(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.Normal),
+    labelLarge = TextStyle(fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
+    labelMedium = TextStyle(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.Medium),
+    labelSmall = TextStyle(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium),
+)
+
 @Composable
 fun RaksysAppTheme(content: @Composable () -> Unit) {
     val colorScheme = darkColorScheme(
@@ -92,6 +116,7 @@ fun RaksysAppTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = RaksysTypography,
         content = content
     )
 }

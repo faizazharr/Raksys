@@ -16,6 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
+import com.raksys.core.ui.FormatIcon
+import com.raksys.core.ui.HistoryIcon
+import com.raksys.core.ui.PlayIcon
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.RaksysPlatform
 
@@ -42,7 +45,7 @@ fun QueryToolbar(
                 onClick = onExecute,
                 enabled = !isRunning,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RaksysThemeColors.SuccessBorder,
+                    containerColor = RaksysThemeColors.SuccessFill,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(5.dp),
@@ -50,7 +53,9 @@ fun QueryToolbar(
                 modifier = Modifier.height(28.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("▶ Run SQL", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    PlayIcon(color = Color.White, size = 12.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Run SQL", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(5.dp))
                     Box(
                         modifier = Modifier
@@ -76,7 +81,9 @@ fun QueryToolbar(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text("⚡ Format", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    FormatIcon(color = RaksysThemeColors.TextSecondary, size = 12.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Format", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
@@ -92,9 +99,11 @@ fun QueryToolbar(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
+                    HistoryIcon(color = RaksysThemeColors.TextSecondary, size = 12.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (historyCount > 0) "📜 Riwayat ($historyCount)" else "📜 Riwayat",
-                        fontSize = 11.sp,
+                        text = if (historyCount > 0) "Riwayat ($historyCount)" else "Riwayat",
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }

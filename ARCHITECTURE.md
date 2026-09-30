@@ -173,7 +173,8 @@ The UI follows Apple's Human Interface Guidelines for desktop apps, translated t
 Rules:
 
 - **Never put white text on `Primary`.** Use `PrimaryFill`. Never use `PrimaryFill` as text on a dark surface.
-- **Text sizes** (desktop): default 13 sp, nothing below 10 sp; captions and badges are 11 sp.
+- **Text sizes** (desktop): `RaksysTypography` maps Material styles to the macOS scale (Body 13, Callout 12, Caption 11, Title 15 / 17). Never go below 11 sp.
+- **Menu-to-screen commands** go through `RaksysCommands` (e.g. `requestRunQuery()`), so `app` does not depend on feature internals.
 - **Environment edge**: a 2 dp line across the top of the window shows the active connection's environment (DEV green, STG amber, PROD red). It is the one signature element of the app; do not add competing brand accents.
 - **Hover and focus**: add `Modifier.raksysInteractive(...)` right before `.clickable { }` on custom rows, tabs, and cards. It adds a hover highlight and a 2 dp focus ring while keeping a single tab stop.
 - **Icons**: workspace chrome uses the vector icons in `WorkspaceIcons.kt` (one stroke weight, colors passed by the caller), not emoji.
