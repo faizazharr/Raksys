@@ -21,6 +21,7 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
 import com.raksys.core.model.EnvironmentType
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.DatabaseIcon
 import com.raksys.core.ui.EyeIcon
 import com.raksys.core.ui.DbTypeLogo
@@ -70,6 +71,7 @@ fun QuickCreateLocalDbDialog(
         else -> null
     }
 
+    ModalGuard()
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(14.dp),

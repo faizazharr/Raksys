@@ -107,6 +107,7 @@ flowchart LR
 ### 🏠 1. Studio Workspace & Multi-Engine Connections
 - **One Window, Five Engines**: PostgreSQL, MySQL/MariaDB, SQLite, MongoDB, and Redis share one connection sidebar and one workflow.
 - **Environment Tags**: mark every connection as `DEV`, `STG`, or `PROD` — the tag is color-coded in the connection list, the query toolbar, and the bottom status bar so you never confuse staging with production.
+- **Light and Dark Themes**: follows your operating system by default, or pick *Terang* / *Gelap* in *File › Settings…* (`⌘,` / `Ctrl+,`). The SQL editor follows too. Every text color meets WCAG AA contrast in both.
 - **Resizable, Collapsible Panels**: drag the splitters to resize the sidebar and navigator, or hide the sidebar with `⌘B` / `Ctrl+B`.
 - **Duplicate, Edit & Delete**: clone any connection profile (including its keyring secrets) in one click; deletion always asks for confirmation.
 

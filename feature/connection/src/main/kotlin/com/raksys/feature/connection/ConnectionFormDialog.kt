@@ -29,6 +29,7 @@ import com.raksys.core.database.DocumentDatabaseDriver
 import com.raksys.core.database.KeyValueDriver
 import com.raksys.core.model.*
 import com.raksys.core.security.CredentialStore
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.EyeIcon
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysThemeColors
@@ -151,6 +152,7 @@ fun ConnectionFormDialog(
         )
     )
 
+    ModalGuard()
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(14.dp),
@@ -617,7 +619,7 @@ fun ConnectionFormDialog(
                                 text = "$validationError",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFFFCA5A5)
+                                color = RaksysThemeColors.Error
                             )
                         }
                     }
@@ -636,7 +638,7 @@ fun ConnectionFormDialog(
                                 text = "✕ ${submitState.message}",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFFFCA5A5)
+                                color = RaksysThemeColors.Error
                             )
                         }
                     }

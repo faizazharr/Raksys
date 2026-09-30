@@ -37,11 +37,11 @@ fun ConnectionCard(
     onDelete: () -> Unit,
 ) {
     val (badgeColor, badgeBg) = when (profile.dbType) {
-        DbType.POSTGRES -> RaksysThemeColors.PostgresColor to Color(0xFF1E334D)
-        DbType.MYSQL -> RaksysThemeColors.MysqlColor to Color(0xFF3D2D14)
-        DbType.SQLITE -> RaksysThemeColors.SqliteColor to Color(0xFF1B374C)
-        DbType.MONGODB -> RaksysThemeColors.MongodbColor to Color(0xFF193B26)
-        DbType.REDIS -> RaksysThemeColors.RedisColor to Color(0xFF421D1D)
+        DbType.POSTGRES -> RaksysThemeColors.PostgresColor to RaksysThemeColors.PostgresBg
+        DbType.MYSQL -> RaksysThemeColors.MysqlColor to RaksysThemeColors.MysqlBg
+        DbType.SQLITE -> RaksysThemeColors.SqliteColor to RaksysThemeColors.SqliteBg
+        DbType.MONGODB -> RaksysThemeColors.MongodbColor to RaksysThemeColors.MongodbBg
+        DbType.REDIS -> RaksysThemeColors.RedisColor to RaksysThemeColors.RedisBg
     }
 
     val cardBg = if (isSelected) RaksysThemeColors.PrimaryContainer else RaksysThemeColors.SurfaceElevated

@@ -71,17 +71,17 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                                 text = "Koneksi Berhasil!",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFD1FAE5)
+                                color = RaksysThemeColors.Success
                             )
                             Text(
                                 text = "Host & kredensial terhubung valid.",
                                 fontSize = 11.sp,
-                                color = Color(0xFFA7F3D0)
+                                color = RaksysThemeColors.TextSecondary
                             )
                         }
                     }
                     IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                        Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = Color(0xFFA7F3D0))
+                        Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = RaksysThemeColors.TextSecondary)
                     }
                 }
             }
@@ -107,18 +107,18 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                                 text = "Koneksi Gagal",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF7B72)
+                                color = RaksysThemeColors.Error
                             )
                         }
                         IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                            Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = Color(0xFFFF7B72))
+                            Text("✕", modifier = Modifier.semantics { contentDescription = "Tutup pesan" }, fontSize = 11.sp, color = RaksysThemeColors.TextSecondary)
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = state.message,
                         fontSize = 11.sp,
-                        color = Color(0xFFFFA198),
+                        color = RaksysThemeColors.TextSecondary,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )

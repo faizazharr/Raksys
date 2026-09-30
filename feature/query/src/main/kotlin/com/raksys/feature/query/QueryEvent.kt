@@ -8,4 +8,6 @@ sealed interface QueryEvent {
     /** The workspace now shows [profileId]; drops the previous connection's result if it differs. */
     data class UseProfile(val profileId: String) : QueryEvent
     data object ClearHistory : QueryEvent
+    /** Deletes the saved history of every connection (Settings > Privacy). */
+    data object ClearAllSavedHistory : QueryEvent
 }

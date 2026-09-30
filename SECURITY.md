@@ -36,7 +36,7 @@ Please be aware of these when deciding how to use Raksys:
 - **The SQL console executes what you type.** Use a read-only database role for exploratory work on sensitive systems.
 - **Redis SSL is not configurable** in the current version; use an SSH tunnel for untrusted networks.
 - **Linux** requires a running Secret Service provider (e.g. GNOME Keyring, KWallet) to save credentials.
-- **Query history is saved to disk** (last 100 statements per connection, `~/.raksys/history/<connection>.json`) and can contain literal values you typed into queries, including sensitive ones. Files are readable by the owner only where the OS supports it. Press *Bersihkan* in the history drawer to delete a connection's history, or delete the `~/.raksys/history` folder. History files of deleted connections stay until you remove them.
+- **Query history is saved to disk by default** (switch it off in *Settings › Privacy*) (last 100 statements per connection, `~/.raksys/history/<connection>.json`) and can contain literal values you typed into queries, including sensitive ones. Files are readable by the owner only where the OS supports it. Press *Bersihkan* in the history drawer to delete a connection's history, or delete the `~/.raksys/history` folder. History files of deleted connections stay until you remove them.
 - Privilege listing for PostgreSQL is scoped to the `public` schema.
 
 **Recommended practice**: connect with the least-privileged account that does the job, tag production connections as `PROD`, and prefer SSH tunnels over exposing database ports.

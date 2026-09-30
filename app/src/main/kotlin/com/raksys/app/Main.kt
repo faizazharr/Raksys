@@ -56,6 +56,8 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontFamily
 import com.raksys.feature.connection.ConnectionPresenter
 import com.raksys.feature.navigator.NavigatorPresenter
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
@@ -166,6 +168,9 @@ fun main() {
         // Fallback gracefully on systems without Taskbar support
     }
 
+    // Load saved settings (appearance, history) before the first window is composed.
+    RaksysSettings.load()
+
     startKoin {
         modules(
             securityModule,
@@ -198,6 +203,7 @@ fun main() {
             var selectedCollection by remember { mutableStateOf<String?>(null) }
             var showAddConnectionDialog by remember { mutableStateOf(false) }
             var isCommandPaletteOpen by remember { mutableStateOf(false) }
+            var showSettings by remember { mutableStateOf(false) }
             var workspaceTab by remember { mutableStateOf(RelationalTab.QUERY) }
 
             // Spatial & Layout States
@@ -226,6 +232,11 @@ fun main() {
                             shortcut = KeyShortcut(Key.T, meta = mod, ctrl = !mod),
                             enabled = isRelational && workspaceTab == RelationalTab.QUERY,
                             onClick = { RaksysCommands.requestNewQueryTab() },
+                        )
+                        Item(
+                            "Settings…",
+                            shortcut = KeyShortcut(Key.Comma, meta = mod, ctrl = !mod),
+                            onClick = { showSettings = true },
                         )
                         Item(
                             "New Connection…",
@@ -518,6 +529,20 @@ fun main() {
                         }
                     }
 
+                    if (showSettings) {
+                        val queryPresenter = koinInject<com.raksys.feature.query.QueryPresenter>()
+                        val settingsScope = rememberCoroutineScope()
+                        SettingsDialog(
+                            onClearSavedHistory = {
+                                settingsScope.launch {
+                                    queryPresenter.onEvent(com.raksys.feature.query.QueryEvent.ClearAllSavedHistory)
+                                    ToastManager.show("Semua riwayat tersimpan dihapus")
+                                }
+                            },
+                            onDismiss = { showSettings = false },
+                        )
+                    }
+
                     if (isCommandPaletteOpen) {
                         CommandPaletteDialog(
                             currentProfile = selectedProfile,
@@ -541,6 +566,7 @@ fun main() {
                             onToggleSidebar = {
                                 isSidebarVisible = !isSidebarVisible
                             },
+                            onOpenSettings = { showSettings = true },
                             onDismiss = { isCommandPaletteOpen = false }
                         )
                     }

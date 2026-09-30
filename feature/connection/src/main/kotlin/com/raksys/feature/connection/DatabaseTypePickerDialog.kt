@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.raksys.core.model.DbType
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysThemeColors
 
@@ -43,6 +44,7 @@ fun DatabaseTypePickerDialog(
         DbTypeInfo(DbType.REDIS, "Redis", "Key-value, cache & queue", RaksysThemeColors.RedisColor),
     )
 
+    ModalGuard()
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(14.dp),

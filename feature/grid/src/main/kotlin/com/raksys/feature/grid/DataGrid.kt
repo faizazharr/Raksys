@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
 import com.raksys.core.model.QueryResult
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.SearchIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysThemeColors
@@ -437,6 +438,7 @@ fun DataGrid(
 
     // --- Cell Detail Inspector Modal ---
     inspectingCell?.let { (columnName, cellContent) ->
+        ModalGuard()
         AlertDialog(
             onDismissRequest = { inspectingCell = null },
             title = {

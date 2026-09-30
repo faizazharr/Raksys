@@ -490,6 +490,7 @@ fun AddDocumentDialog(
         isValidJsonSyntax(jsonText)
     }
 
+    ModalGuard()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {

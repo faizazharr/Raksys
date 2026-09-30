@@ -41,6 +41,7 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DatabaseRole
 import com.raksys.core.model.PrivilegeType
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.ShieldIcon
 import com.raksys.core.ui.UserIcon
 import com.raksys.core.ui.RaksysEmptyState
@@ -125,6 +126,7 @@ fun PermissionScreen(profile: ConnectionProfile, modifier: Modifier = Modifier) 
     }
 
     pendingRevoke?.let { req ->
+        ModalGuard()
         AlertDialog(
             onDismissRequest = { pendingRevoke = null },
             title = { Text("Cabut Akses?") },

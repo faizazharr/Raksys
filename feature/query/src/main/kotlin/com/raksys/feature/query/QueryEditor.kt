@@ -82,6 +82,11 @@ fun QueryEditor(
         }
     }
 
+    // Start with the same sample the first tab holds, instead of an empty editor.
+    LaunchedEffect(Unit) {
+        if (textArea.text.isBlank()) textArea.text = userScratchpadSql
+    }
+
     // Console tabs: keep each tab's text, swap the editor content when the active tab changes.
     val switchToTabs: (SqlTabs) -> Unit = { next ->
         sqlTabs = next

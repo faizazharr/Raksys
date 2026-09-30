@@ -45,7 +45,7 @@ This document outlines planned milestones and ideas for **Raksys**. It is a livi
 - [ ] **Configurable safeguard rules** (per-environment; e.g. also guard STAGING).
 - [ ] **Read-only connection mode**.
 - [ ] **Import / export connection profiles** (secrets excluded).
-- [ ] **Light theme** and theme switcher.
+- [x] **Light theme** and theme switcher (Settings › Tampilan).
 - [ ] **Localization** (Indonesian / English UI strings).
 
 ### 📌 Milestone 5: Distribution (v1.0.0)

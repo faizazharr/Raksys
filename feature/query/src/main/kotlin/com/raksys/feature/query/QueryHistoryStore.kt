@@ -8,6 +8,9 @@ import java.io.File
 interface QueryHistoryStore {
     fun load(profileId: String): List<QueryHistoryItem>
     fun save(profileId: String, items: List<QueryHistoryItem>)
+
+    /** Removes every saved history (all connections). Returns how many were deleted. */
+    fun clearAll(): Int
 }
 
 class InMemoryQueryHistoryStore : QueryHistoryStore {
@@ -16,6 +19,7 @@ class InMemoryQueryHistoryStore : QueryHistoryStore {
     override fun save(profileId: String, items: List<QueryHistoryItem>) {
         data[profileId] = items
     }
+    override fun clearAll(): Int = data.size.also { data.clear() }
 }
 
 /**
@@ -26,6 +30,8 @@ class InMemoryQueryHistoryStore : QueryHistoryStore {
  */
 class FileQueryHistoryStore(
     private val dir: File = File(System.getProperty("user.home"), ".raksys/history"),
+    /** Checked on every write; when false nothing new is put on disk (deleting still works). */
+    private val enabled: () -> Boolean = { true },
 ) : QueryHistoryStore {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -44,6 +50,7 @@ class FileQueryHistoryStore(
                 file.delete()
                 return
             }
+            if (!enabled()) return
             dir.mkdirs()
             file.writeText(json.encodeToString(serializer, items))
             // Owner-only where supported (POSIX); a no-op on Windows.
@@ -53,6 +60,9 @@ class FileQueryHistoryStore(
             file.setWritable(true, true)
         }
     }
+
+    override fun clearAll(): Int =
+        dir.listFiles { f -> f.isFile && f.extension == "json" }.orEmpty().count { it.delete() }
 
     /** Profile ids come from our own file, but never let one escape the history directory. */
     private fun fileFor(profileId: String): File {

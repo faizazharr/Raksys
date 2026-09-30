@@ -30,9 +30,16 @@ class QueryPresenter(
 
     private var activeProfileId: String? = null
 
-    /** Newest first, capped at [MAX_HISTORY], written to the store for the connection that ran it. */
+    /** History per connection, kept in memory so it works even when saving to disk is switched off. */
+    private val memory = mutableMapOf<String, List<QueryHistoryItem>>()
+
+    private fun historyFor(profileId: String): List<QueryHistoryItem> =
+        memory.getOrPut(profileId) { historyStore.load(profileId) }
+
+    /** Newest first, capped at [MAX_HISTORY]; also handed to the store for the connection that ran it. */
     private fun record(profileId: String, item: QueryHistoryItem) {
-        val updated = (listOf(item) + historyStore.load(profileId)).take(MAX_HISTORY)
+        val updated = (listOf(item) + historyFor(profileId)).take(MAX_HISTORY)
+        memory[profileId] = updated
         historyStore.save(profileId, updated)
         if (activeProfileId == profileId) _history.value = updated
     }
@@ -46,7 +53,7 @@ class QueryPresenter(
                     if (state.value is UiState.Loading) driver.cancel()
                     _state.value = UiState.Idle
                     activeProfileId = event.profileId
-                    _history.value = historyStore.load(event.profileId)
+                    _history.value = historyFor(event.profileId)
                 }
             }
             is QueryEvent.Execute -> {
@@ -81,7 +88,15 @@ class QueryPresenter(
             }
             QueryEvent.Cancel -> driver.cancel()
             QueryEvent.ClearHistory -> {
-                activeProfileId?.let { historyStore.save(it, emptyList()) }
+                activeProfileId?.let {
+                    memory[it] = emptyList()
+                    historyStore.save(it, emptyList())
+                }
+                _history.value = emptyList()
+            }
+            QueryEvent.ClearAllSavedHistory -> {
+                memory.clear()
+                historyStore.clearAll()
                 _history.value = emptyList()
             }
         }

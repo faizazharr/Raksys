@@ -174,7 +174,7 @@ fun RaksysErrorState(
                         text = title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFFF7B72)
+                        color = RaksysThemeColors.Error
                     )
                 }
 
@@ -184,7 +184,7 @@ fun RaksysErrorState(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color.Black.copy(alpha = 0.5f))
+                        .background(RaksysThemeColors.Surface.copy(alpha = 0.6f))
                         .border(1.dp, RaksysThemeColors.ErrorBorder.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
                         .padding(10.dp)
                 ) {
@@ -192,7 +192,7 @@ fun RaksysErrorState(
                         text = errorMessage,
                         style = MaterialTheme.typography.bodySmall,
                         fontFamily = FontFamily.Monospace,
-                        color = Color(0xFFFFA198),
+                        color = RaksysThemeColors.Error,
                         lineHeight = 17.sp
                     )
                 }
@@ -205,7 +205,7 @@ fun RaksysErrorState(
                     ) {
                         OutlinedButton(
                             onClick = onRetry,
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF7B72)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = RaksysThemeColors.Error),
                             border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                                 brush = androidx.compose.ui.graphics.SolidColor(RaksysThemeColors.Error)
                             ),

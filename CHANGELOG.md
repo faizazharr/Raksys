@@ -5,11 +5,16 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 ## [Unreleased]
 
 ### Features
+- **Light theme and Settings** (*File › Settings…*, `⌘,` / `Ctrl+,`): appearance *Ikuti sistem* (default) / *Terang* / *Gelap*, applied instantly and saved to `~/.raksys/settings.json`. The SQL editor, command palette, badges, and Redis type colors all follow. Both palettes are contrast-checked by a unit test.
+- **Privacy switch for query history** in Settings, plus *Hapus semua riwayat tersimpan*.
 - **Multiple SQL console tabs** with per-tab text, a `+` button, close buttons, and *File › New Query Tab*.
 - **Query history is saved per connection** under `~/.raksys/history/` (last 100, owner-only permissions where supported); *Bersihkan* deletes it from disk.
 - **Save results to a file**: *Simpan CSV…* / *Simpan JSON…* with a native save dialog. The JSON export now escapes quotes, backslashes, and line breaks correctly and keeps numbers, booleans, and `null` typed (it used to quote every value and break on newlines).
 
 ### Fixes
+- Dialogs that open over the SQL editor (settings, connection form, production safeguard, command palette, and others) are no longer partly covered by it; the editor steps aside while a dialog is open.
+- The first console tab now shows its sample query instead of an empty editor.
+- PostgreSQL badge text in the dark theme raised from 4.3:1 to 5.1:1.
 - Query results from one connection no longer stay on screen after switching to another.
 - SQLite and other passwordless connections work on machines without an OS keyring; only *saving* a password fails, with a clear message.
 - Search fields no longer clip their text (new `RaksysSearchField`); the ERD search box no longer covers the first tables; default window is 1280×800.

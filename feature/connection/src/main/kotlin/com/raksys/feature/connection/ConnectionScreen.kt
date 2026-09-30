@@ -22,6 +22,7 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
 import com.raksys.core.model.UiState
 import com.raksys.core.security.CredentialStore
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.RaksysSearchField
 import com.raksys.core.ui.LightningIcon
 import com.raksys.core.ui.PlugIcon
@@ -337,6 +338,7 @@ fun ConnectionListScreen(
     }
 
     pendingDelete?.let { profile ->
+        ModalGuard()
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
             title = { Text("Hapus Koneksi?") },

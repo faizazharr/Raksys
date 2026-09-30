@@ -3,44 +3,63 @@ package com.raksys.feature.query
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import com.raksys.core.ui.RaksysModals
 import com.raksys.core.ui.RaksysThemeColors
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rtextarea.RTextScrollPane
 
 @Composable
 fun SqlCodeEditor(textArea: RSyntaxTextArea, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.background(RaksysThemeColors.Surface)) {
-        SwingPanel(
-            factory = {
-                RTextScrollPane(textArea).apply {
-                    border = null
-                    verticalScrollBar.background = java.awt.Color(0x16, 0x1B, 0x22)
-                    horizontalScrollBar.background = java.awt.Color(0x16, 0x1B, 0x22)
-                }
-            },
-            modifier = Modifier.fillMaxSize()
+    // Reading isDark here re-runs this body (and the update block below) when the appearance changes.
+    val dark = RaksysThemeColors.isDark
+    val chrome = RaksysThemeColors.Surface
+    SideEffect { textArea.applyEditorTheme(dark) }
+    Box(modifier = modifier.background(chrome)) {
+        // A Swing component paints over Compose dialogs, so step aside while one is open. The text lives
+        // in [textArea], which survives, and the editor comes back when the dialog closes.
+        if (!RaksysModals.isOpen) {
+            SwingPanel(
+                factory = {
+                    RTextScrollPane(textArea).apply { border = null }
+                },
+                update = { pane ->
+                    val awt = java.awt.Color(chrome.red, chrome.green, chrome.blue)
+                    pane.verticalScrollBar.background = awt
+                    pane.horizontalScrollBar.background = awt
+                    pane.repaint()
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+/**
+ * Applies RSyntaxTextArea's bundled dark or light (default) syntax theme, so the editor matches the
+ * app appearance. Falls back to plain colors if the theme resource is missing.
+ */
+private fun RSyntaxTextArea.applyEditorTheme(dark: Boolean) {
+    val resource = if (dark) "dark.xml" else "default.xml"
+    try {
+        val theme = org.fife.ui.rsyntaxtextarea.Theme.load(
+            javaClass.getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/$resource")
         )
+        theme.apply(this)
+    } catch (_: Exception) {
+        background = if (dark) java.awt.Color(0x16, 0x1B, 0x22) else java.awt.Color.WHITE
+        foreground = if (dark) java.awt.Color(0xF0, 0xF6, 0xFC) else java.awt.Color(0x1F, 0x29, 0x37)
+        caretColor = if (dark) java.awt.Color.WHITE else java.awt.Color.BLACK
     }
 }
 
 fun createSqlTextArea(onExecute: (() -> Unit)? = null): RSyntaxTextArea = RSyntaxTextArea().apply {
     syntaxEditingStyle = org.fife.ui.rsyntaxtextarea.SyntaxConstants.SYNTAX_STYLE_SQL
     isCodeFoldingEnabled = true
-    background = java.awt.Color(0x16, 0x1B, 0x22)
-    currentLineHighlightColor = java.awt.Color(0x21, 0x26, 0x2D)
-    caretColor = java.awt.Color.WHITE
-    foreground = java.awt.Color(0xF0, 0xF6, 0xFC)
-    try {
-        val theme = org.fife.ui.rsyntaxtextarea.Theme.load(
-            javaClass.getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/dark.xml")
-        )
-        theme.apply(this)
-    } catch (_: Exception) {
-        // Gunakan styling fallback jika resource theme dark bawaan tidak ada
-    }
+    applyEditorTheme(RaksysThemeColors.isDark)
 
     if (onExecute != null) {
         bindExecutionShortcut(onExecute)

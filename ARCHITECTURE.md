@@ -161,7 +161,9 @@ Shared behaviors:
 
 The UI follows Apple's Human Interface Guidelines for desktop apps, translated to Compose Desktop. Every screen takes its colors and behaviors from `core:ui`; features never hard-code new colors.
 
-| Token | Value | Use | Contrast |
+Colors live in two palettes, `DarkPalette` and `LightPalette`, in `RaksysTheme.kt`. `RaksysThemeColors.X` reads the active palette, so a change in *Settings › Tampilan* recolors every screen; never hard-code a color in a feature, and add a new token with values for **both** palettes. `SettingsStoreTest` checks the contrast of the main text and status pairs in both palettes. The table below lists the dark palette.
+
+| Token | Value (dark) | Use | Contrast |
 |---|---|---|---|
 | `TextPrimary` | `#F1F5F9` | Body and titles | 14.7:1 on Surface |
 | `TextSecondary` | `#A0AEC0` | Supporting text | 7.2:1 on Surface |
@@ -179,6 +181,8 @@ Rules:
 - **Environment edge**: a 2 dp line across the top of the window shows the active connection's environment (DEV green, STG amber, PROD red). It is the one signature element of the app; do not add competing brand accents.
 - **Hover and focus**: add `Modifier.raksysInteractive(...)` right before `.clickable { }` on custom rows, tabs, and cards. It adds a hover highlight and a 2 dp focus ring while keeping a single tab stop.
 - **Icons**: use the vector icons in `WorkspaceIcons.kt` and `ActionIcons.kt` (one stroke weight, color passed by the caller), never emoji. Give an icon-only button a `contentDescription` so screen readers announce it; leave it null when a text label sits beside the icon. Icon-only buttons are at least 28 dp.
+- **Dialogs**: call `ModalGuard()` right before composing any `Dialog` / `AlertDialog`. The SQL editor is a Swing component that paints over Compose content, so it hides itself while a dialog is open.
+- **Settings**: `RaksysSettings` (Compose state, persisted to `~/.raksys/settings.json`). Add new options to `SettingsData` and to `SettingsDialog`.
 - **Shortcuts**: label them with `RaksysPlatform.shortcut("K")` so they read ⌘K on macOS and Ctrl+K elsewhere. Every app-level command must also exist in the menu bar (`Main.kt` → `MenuBar`).
 
 ## 🧪 Testing

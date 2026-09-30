@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.ShieldIcon
 import com.raksys.core.ui.RaksysThemeColors
 
@@ -36,6 +37,7 @@ fun ProductionSafeguardDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    ModalGuard()
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(10.dp),

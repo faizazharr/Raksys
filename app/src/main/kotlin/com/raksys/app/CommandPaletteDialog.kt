@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.TableSchema
+import com.raksys.core.ui.ModalGuard
 import com.raksys.core.ui.SearchIcon
 import com.raksys.core.ui.SidebarIcon
+import com.raksys.core.ui.EditIcon
 import com.raksys.core.ui.PlusIcon
 import com.raksys.core.ui.DatabaseIcon
 import com.raksys.core.ui.ShieldIcon
@@ -40,11 +42,27 @@ import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.RaksysPlatform
 
-enum class CommandCategory(val label: String, val color: Color, val bg: Color) {
-    TABLE("Tabel", Color(0xFF60A5FA), Color(0xFF1E3A5F)),
-    CONNECTION("Koneksi", Color(0xFF34D399), Color(0xFF133E2B)),
-    NAVIGATION("Navigasi", Color(0xFFA78BFA), Color(0xFF2E1F4D)),
-    ACTION("Aksi", Color(0xFFFBBF24), Color(0xFF45300F)),
+enum class CommandCategory(val label: String) {
+    TABLE("Tabel"),
+    CONNECTION("Koneksi"),
+    NAVIGATION("Navigasi"),
+    ACTION("Aksi");
+
+    // Read from the theme on every use so the badge follows light / dark.
+    val color: Color
+        get() = when (this) {
+            TABLE -> RaksysThemeColors.Info
+            CONNECTION -> RaksysThemeColors.Success
+            NAVIGATION -> RaksysThemeColors.Purple
+            ACTION -> RaksysThemeColors.Warning
+        }
+    val bg: Color
+        get() = when (this) {
+            TABLE -> RaksysThemeColors.InfoBg
+            CONNECTION -> RaksysThemeColors.SuccessBg
+            NAVIGATION -> RaksysThemeColors.PurpleBg
+            ACTION -> RaksysThemeColors.WarningBg
+        }
 }
 
 data class PaletteItem(
@@ -66,6 +84,7 @@ fun CommandPaletteDialog(
     onSelectTab: (RelationalTab) -> Unit,
     onNewConnection: () -> Unit,
     onToggleSidebar: () -> Unit,
+    onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
@@ -153,6 +172,16 @@ fun CommandPaletteDialog(
         )
         list.add(
             PaletteItem(
+                id = "action-settings",
+                title = "Buka Pengaturan (${RaksysPlatform.shortcut(",")})",
+                subtitle = "Tampilan terang / gelap dan privasi riwayat kueri",
+                category = CommandCategory.ACTION,
+                icon = { EditIcon(color = RaksysThemeColors.TextSecondary) },
+                onExecute = onOpenSettings
+            )
+        )
+        list.add(
+            PaletteItem(
                 id = "action-toggle-sidebar",
                 title = "Toggle Sidebar Koneksi (${RaksysPlatform.shortcut("B")})",
                 subtitle = "Tampilkan atau sembunyikan sidebar",
@@ -186,6 +215,7 @@ fun CommandPaletteDialog(
         focusRequester.requestFocus()
     }
 
+    ModalGuard()
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),

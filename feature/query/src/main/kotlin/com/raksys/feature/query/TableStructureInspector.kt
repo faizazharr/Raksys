@@ -290,8 +290,8 @@ private fun ColumnRow(index: Int, column: ColumnDefinition) {
             } else {
                 RaksysStatusBadge(
                     text = "NOT NULL",
-                    statusColor = Color(0xFFF87171),
-                    bgColor = Color(0xFF3B1818)
+                    statusColor = RaksysThemeColors.Error,
+                    bgColor = RaksysThemeColors.ErrorBg
                 )
             }
         }

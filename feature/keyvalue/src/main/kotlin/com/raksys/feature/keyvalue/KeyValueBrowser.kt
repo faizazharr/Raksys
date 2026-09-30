@@ -170,11 +170,11 @@ fun KeyValueBrowser(
                                     val count = if (typeKey == "ALL") current.data.size else current.data.count { it.type.equals(typeKey, ignoreCase = true) }
                                     val isSelected = selectedTypeFilter == typeKey
                                     val chipColor = if (typeKey == "ALL") RaksysThemeColors.Primary else when (typeKey) {
-                                        "string" -> Color(0xFF60A5FA)
-                                        "hash" -> Color(0xFF34D399)
-                                        "list" -> Color(0xFFFBBF24)
-                                        "set" -> Color(0xFFA78BFA)
-                                        "zset" -> Color(0xFFF472B6)
+                                        "string" -> RaksysThemeColors.TypeString
+                                        "hash" -> RaksysThemeColors.TypeHash
+                                        "list" -> RaksysThemeColors.TypeList
+                                        "set" -> RaksysThemeColors.TypeSet
+                                        "zset" -> RaksysThemeColors.TypeZset
                                         else -> RaksysThemeColors.TextSecondary
                                     }
 
@@ -290,6 +290,7 @@ fun KeyValueBrowser(
 
     // Detail Value Inspector Modal
     inspectingEntry?.let { entry ->
+        ModalGuard()
         AlertDialog(
             onDismissRequest = { inspectingEntry = null },
             title = {
