@@ -156,6 +156,29 @@ Shared behaviors:
 
 ---
 
+## 🎨 Design System (`core:ui`)
+
+The UI follows Apple's Human Interface Guidelines for desktop apps, translated to Compose Desktop. Every screen takes its colors and behaviors from `core:ui`; features never hard-code new colors.
+
+| Token | Value | Use | Contrast |
+|---|---|---|---|
+| `TextPrimary` | `#F1F5F9` | Body and titles | 14.7:1 on Surface |
+| `TextSecondary` | `#A0AEC0` | Supporting text | 7.2:1 on Surface |
+| `TextMuted` | `#98A4B8` | Tertiary text, hints | 5.7:1 on Surface, 4.9:1 on SurfaceElevated |
+| `Primary` | `#78A9FA` | Accent for **text, icons, borders** | 6.8:1 on Surface |
+| `PrimaryFill` | `#2B67D6` | Accent for **filled buttons** with white text | 5.2:1 (white on fill) |
+| `EnvProdFill` | `#C62828` | Filled destructive button with white text | 5.6:1 |
+| `Env*Text` | mint / amber / salmon | DEV / STG / PROD label on `Env*Bg` | 5.3–6.4:1 |
+
+Rules:
+
+- **Never put white text on `Primary`.** Use `PrimaryFill`. Never use `PrimaryFill` as text on a dark surface.
+- **Text sizes** (desktop): default 13 sp, nothing below 10 sp; captions and badges are 11 sp.
+- **Environment edge**: a 2 dp line across the top of the window shows the active connection's environment (DEV green, STG amber, PROD red). It is the one signature element of the app; do not add competing brand accents.
+- **Hover and focus**: add `Modifier.raksysInteractive(...)` right before `.clickable { }` on custom rows, tabs, and cards. It adds a hover highlight and a 2 dp focus ring while keeping a single tab stop.
+- **Icons**: workspace chrome uses the vector icons in `WorkspaceIcons.kt` (one stroke weight, colors passed by the caller), not emoji.
+- **Shortcuts**: label them with `RaksysPlatform.shortcut("K")` so they read ⌘K on macOS and Ctrl+K elsewhere. Every app-level command must also exist in the menu bar (`Main.kt` → `MenuBar`).
+
 ## 🧪 Testing
 
 Pure logic is covered by JUnit 5 + `kotlin-test`:

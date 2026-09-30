@@ -102,7 +102,7 @@ fun TableStructureInspector(
                 ) {
                     Text(
                         text = "${table.columns.size} Kolom",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = RaksysThemeColors.Primary
                     )
@@ -147,7 +147,7 @@ fun TableStructureInspector(
                         copyToClipboard(insert)
                         ToastManager.show("Template INSERT disalin ke clipboard")
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary),
+                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill),
                     shape = RoundedCornerShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)

@@ -20,6 +20,7 @@ import com.raksys.core.model.DbType
 import com.raksys.core.ui.DbTypeLogo
 import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.raksysInteractive
 
 @Composable
 fun ConnectionCard(
@@ -49,6 +50,7 @@ fun ConnectionCard(
             .clip(RoundedCornerShape(8.dp))
             .background(cardBg)
             .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .raksysInteractive(RoundedCornerShape(8.dp), enabled = !isSelected)
             .clickable { onClick() }
             .padding(12.dp)
     ) {
@@ -71,17 +73,23 @@ fun ConnectionCard(
                     )
                 }
 
-                val (envColor, envBg, envLabel) = when (profile.environment) {
-                    com.raksys.core.model.EnvironmentType.DEVELOPMENT -> Triple(RaksysThemeColors.EnvDev, RaksysThemeColors.EnvDevBg, "DEV")
-                    com.raksys.core.model.EnvironmentType.STAGING -> Triple(RaksysThemeColors.EnvStaging, RaksysThemeColors.EnvStagingBg, "STG")
-                    com.raksys.core.model.EnvironmentType.PRODUCTION -> Triple(RaksysThemeColors.EnvProd, RaksysThemeColors.EnvProdBg, "PROD")
+                val (envColor, envBg, envText) = when (profile.environment) {
+                    com.raksys.core.model.EnvironmentType.DEVELOPMENT -> Triple(RaksysThemeColors.EnvDev, RaksysThemeColors.EnvDevBg, RaksysThemeColors.EnvDevText)
+                    com.raksys.core.model.EnvironmentType.STAGING -> Triple(RaksysThemeColors.EnvStaging, RaksysThemeColors.EnvStagingBg, RaksysThemeColors.EnvStagingText)
+                    com.raksys.core.model.EnvironmentType.PRODUCTION -> Triple(RaksysThemeColors.EnvProd, RaksysThemeColors.EnvProdBg, RaksysThemeColors.EnvProdText)
+                }
+                val envLabel = when (profile.environment) {
+                    com.raksys.core.model.EnvironmentType.DEVELOPMENT -> "DEV"
+                    com.raksys.core.model.EnvironmentType.STAGING -> "STG"
+                    com.raksys.core.model.EnvironmentType.PRODUCTION -> "PROD"
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     RaksysStatusBadge(
                         text = envLabel,
                         statusColor = envColor,
-                        bgColor = envBg
+                        bgColor = envBg,
+                        textColor = envText
                     )
                     RaksysStatusBadge(
                         text = profile.dbType.name,

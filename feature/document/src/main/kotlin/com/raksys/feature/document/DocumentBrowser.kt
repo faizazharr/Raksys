@@ -232,6 +232,7 @@ fun DocumentCollectionList(
                                             if (isSelected) RaksysThemeColors.Primary else Color.Transparent,
                                             RoundedCornerShape(6.dp)
                                         )
+                                        .raksysInteractive(RoundedCornerShape(6.dp), enabled = !isSelected)
                                         .clickable { onSelectCollection(collection.name) }
                                         .padding(horizontal = 10.dp, vertical = 7.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -320,7 +321,7 @@ fun DocumentViewer(
                 ) {
                     Text(
                         text = "$docCount Dokumen",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = RaksysThemeColors.TextSecondary
                     )
@@ -348,7 +349,7 @@ fun DocumentViewer(
                 // Add Document Button
                 Button(
                     onClick = { isAddDialogOpen = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary),
+                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill),
                     shape = RoundedCornerShape(5.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
@@ -364,7 +365,7 @@ fun DocumentViewer(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text(if (isPrettyFormatted) "Mode: Rapi" else "Mode: Compact", fontSize = 10.sp)
+                    Text(if (isPrettyFormatted) "Mode: Rapi" else "Mode: Compact", fontSize = 11.sp)
                 }
 
                 IconButton(
@@ -441,7 +442,7 @@ fun DocumentViewer(
                                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                             modifier = Modifier.height(24.dp)
                                         ) {
-                                            Text("📋 Salin JSON", fontSize = 10.sp)
+                                            Text("📋 Salin JSON", fontSize = 11.sp)
                                         }
                                     }
 
@@ -577,7 +578,7 @@ fun AddDocumentDialog(
             Button(
                 onClick = { onSave(jsonText) },
                 enabled = isValidJson && submitState !is UiState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary)
+                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill)
             ) {
                 if (submitState is UiState.Loading) {
                     CircularProgressIndicator(modifier = Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)

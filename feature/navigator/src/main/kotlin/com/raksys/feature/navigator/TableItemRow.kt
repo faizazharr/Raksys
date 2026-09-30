@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.TableSchema
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.raksysInteractive
 import com.raksys.core.ui.ToastManager
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
@@ -51,6 +52,7 @@ fun TableItemRow(
             .clip(RoundedCornerShape(6.dp))
             .background(bg)
             .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+            .raksysInteractive(RoundedCornerShape(6.dp), enabled = !isSelected)
             .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -91,7 +93,7 @@ fun TableItemRow(
             ) {
                 Text(
                     text = "${table.columns.size} col",
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     color = RaksysThemeColors.TextMuted
                 )
             }

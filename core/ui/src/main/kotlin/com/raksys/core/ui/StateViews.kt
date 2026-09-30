@@ -225,7 +225,8 @@ fun RaksysStatusBadge(
     text: String,
     statusColor: Color,
     bgColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: Color = statusColor,
 ) {
     Box(
         modifier = modifier
@@ -239,7 +240,7 @@ fun RaksysStatusBadge(
             text = text,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
-            color = statusColor
+            color = textColor
         )
     }
 }

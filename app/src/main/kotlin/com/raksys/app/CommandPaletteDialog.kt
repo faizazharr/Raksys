@@ -28,6 +28,7 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.TableSchema
 import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.RaksysPlatform
 
 enum class CommandCategory(val label: String, val color: Color, val bg: Color) {
     TABLE("Tabel", Color(0xFF60A5FA), Color(0xFF1E3A5F)),
@@ -143,7 +144,7 @@ fun CommandPaletteDialog(
         list.add(
             PaletteItem(
                 id = "action-toggle-sidebar",
-                title = "Toggle Sidebar Koneksi (⌘B)",
+                title = "Toggle Sidebar Koneksi (${RaksysPlatform.shortcut("B")})",
                 subtitle = "Tampilkan atau sembunyikan sidebar",
                 category = CommandCategory.ACTION,
                 icon = "◧",
@@ -257,7 +258,7 @@ fun CommandPaletteDialog(
                             .border(1.dp, RaksysThemeColors.Border, RoundedCornerShape(4.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text("ESC to close", fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
+                        Text("ESC to close", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                     }
                 }
 
@@ -322,7 +323,7 @@ fun CommandPaletteDialog(
                                     if (item.subtitle != null) {
                                         Text(
                                             text = item.subtitle,
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             color = RaksysThemeColors.TextMuted,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
@@ -360,12 +361,12 @@ fun CommandPaletteDialog(
                 ) {
                     Text(
                         text = "Gunakan ↑ ↓ untuk navigasi, ↵ untuk memilih",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         color = RaksysThemeColors.TextMuted
                     )
                     Text(
                         text = "${filteredItems.size} hasil",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = RaksysThemeColors.TextMuted
                     )

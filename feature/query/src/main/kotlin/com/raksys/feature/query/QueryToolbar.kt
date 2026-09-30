@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.RaksysPlatform
 
 @Composable
 fun QueryToolbar(
@@ -57,7 +58,7 @@ fun QueryToolbar(
                             .background(Color.White.copy(alpha = 0.22f))
                             .padding(horizontal = 4.dp, vertical = 1.dp)
                     ) {
-                        Text("⌘↵", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("${RaksysPlatform.modLabel}↵", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }

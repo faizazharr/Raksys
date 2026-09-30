@@ -4,6 +4,14 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+### UI / Accessibility
+- **Contrast fixes** (WCAG AA): muted text 4.0:1 → 5.7:1, accent text 4.9:1 → 6.8:1, white-on-accent buttons 3.3:1 → 5.2:1, PROD badge 2.7:1 → 5.3:1. Filled buttons now use the new `PrimaryFill` token; destructive confirm uses `EnvProdFill`.
+- **Minimum text size**: no text below 10 sp (previously 9 sp); captions and badges raised to 11 sp.
+- **Native menu bar** (File / View / Go) with platform-correct shortcuts (`⌘` on macOS, `Ctrl` elsewhere); shortcut hints in the status bar, toolbar, and command palette follow the platform.
+- **Hover and keyboard focus** feedback on tabs, connection cards, table rows, collections, and Redis keys.
+- **Vector icons** for the Query / ERD / Permissions tabs and the sidebar toggle, replacing emoji.
+- **Environment edge**: a 2 dp window-wide line in the active connection's environment color.
+
 ### Documentation
 - Added full project documentation: `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `ROADMAP.md`, `RELEASING.md`, `DOWNLOAD.md`, `CODE_OF_CONDUCT.md`, donation info, a flow diagram, and issue / PR templates.
 

@@ -140,7 +140,7 @@ fun ConnectionListScreen(
                 Button(
                     onClick = { onShowAddDialogChange(true) },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RaksysThemeColors.Primary,
+                        containerColor = RaksysThemeColors.PrimaryFill,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(6.dp),
@@ -235,7 +235,7 @@ fun ConnectionListScreen(
                     Button(
                         onClick = { onShowAddDialogChange(true) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = RaksysThemeColors.Primary,
+                            containerColor = RaksysThemeColors.PrimaryFill,
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(6.dp),

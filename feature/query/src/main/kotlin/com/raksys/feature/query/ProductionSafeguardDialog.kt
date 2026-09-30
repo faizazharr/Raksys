@@ -111,7 +111,7 @@ fun ProductionSafeguardDialog(
             Button(
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RaksysThemeColors.EnvProd,
+                    containerColor = RaksysThemeColors.EnvProdFill,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(6.dp),

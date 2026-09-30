@@ -76,7 +76,7 @@ fun QueryHistoryDrawer(
                 ) {
                     Text(
                         text = "${history.size}",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = RaksysThemeColors.Primary
                     )
@@ -160,7 +160,7 @@ fun QueryHistoryDrawer(
                                     ) {
                                         Text(
                                             text = if (item.isSuccess) "✓ SUKSES" else "✕ GAGAL",
-                                            fontSize = 9.sp,
+                                            fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = if (item.isSuccess) RaksysThemeColors.Success else RaksysThemeColors.Error
                                         )
@@ -171,7 +171,7 @@ fun QueryHistoryDrawer(
                                     item.executionTimeMs?.let {
                                         Text(
                                             text = "${it} ms",
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             fontFamily = FontFamily.Monospace,
                                             color = RaksysThemeColors.TextMuted
                                         )
@@ -180,7 +180,7 @@ fun QueryHistoryDrawer(
                                     item.rowCount?.let {
                                         Text(
                                             text = " • $it baris",
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             color = RaksysThemeColors.TextMuted
                                         )
                                     }
@@ -188,7 +188,7 @@ fun QueryHistoryDrawer(
 
                                 Text(
                                     text = timeFormat.format(Date(item.timestamp)),
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = RaksysThemeColors.TextMuted
                                 )
                             }
@@ -231,7 +231,7 @@ fun QueryHistoryDrawer(
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     modifier = Modifier.height(24.dp)
                                 ) {
-                                    Text("📋 Salin", fontSize = 10.sp)
+                                    Text("📋 Salin", fontSize = 11.sp)
                                 }
 
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -239,14 +239,14 @@ fun QueryHistoryDrawer(
                                 Button(
                                     onClick = { onSelectQuery(item.sql) },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = RaksysThemeColors.Primary,
+                                        containerColor = RaksysThemeColors.PrimaryFill,
                                         contentColor = Color.White
                                     ),
                                     shape = RoundedCornerShape(4.dp),
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                     modifier = Modifier.height(24.dp)
                                 ) {
-                                    Text("⚡ Muat ke Editor", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("⚡ Muat ke Editor", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

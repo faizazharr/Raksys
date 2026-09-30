@@ -144,7 +144,7 @@ fun DataGrid(
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = "• Sel terpilih: R${r + 1}:C${c + 1} (${result.columns.getOrElse(c) { "" }})",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         color = RaksysThemeColors.Primary
                     )
                 }
@@ -165,7 +165,7 @@ fun DataGrid(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔍", fontSize = 10.sp)
+                    Text("🔍", fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     BasicTextField(
                         value = filterQuery,
@@ -178,7 +178,7 @@ fun DataGrid(
                         modifier = Modifier.weight(1f),
                         decorationBox = { innerTextField ->
                             if (filterQuery.isEmpty()) {
-                                Text("Filter baris...", fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
+                                Text("Filter baris...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                             }
                             innerTextField()
                         }
@@ -186,7 +186,7 @@ fun DataGrid(
                     if (filterQuery.isNotEmpty()) {
                         Text(
                             text = "✕",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = RaksysThemeColors.TextMuted,
                             modifier = Modifier
                                 .clickable { filterQuery = "" }
@@ -212,7 +212,7 @@ fun DataGrid(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                         modifier = Modifier.height(24.dp)
                     ) {
-                        Text("📋 Salin Sel", fontSize = 10.sp)
+                        Text("📋 Salin Sel", fontSize = 11.sp)
                     }
                 }
 
@@ -237,7 +237,7 @@ fun DataGrid(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(24.dp)
                 ) {
-                    Text("Export CSV", fontSize = 10.sp)
+                    Text("Export CSV", fontSize = 11.sp)
                 }
 
                 OutlinedButton(
@@ -260,7 +260,7 @@ fun DataGrid(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(24.dp)
                 ) {
-                    Text("Export JSON", fontSize = 10.sp)
+                    Text("Export JSON", fontSize = 11.sp)
                 }
             }
         }
@@ -329,7 +329,7 @@ fun DataGrid(
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = if (sortState?.second == GridSortDirection.ASC) "▲" else "▼",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = RaksysThemeColors.Primary
                                     )
@@ -366,7 +366,7 @@ fun DataGrid(
                             ) {
                                 Text(
                                     text = "${rowIndex + 1}",
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = if (isRowSelected) RaksysThemeColors.Primary else RaksysThemeColors.TextMuted
                                 )
@@ -404,7 +404,7 @@ fun DataGrid(
                                         ) {
                                             Text(
                                                 text = "NULL",
-                                                fontSize = 9.sp,
+                                                fontSize = 10.sp,
                                                 fontFamily = FontFamily.Monospace,
                                                 fontWeight = FontWeight.Bold,
                                                 color = RaksysThemeColors.TextMuted
@@ -469,7 +469,7 @@ fun DataGrid(
                         ToastManager.show("Nilai sel disalin ke clipboard")
                         inspectingCell = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary)
+                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill)
                 ) {
                     Text("Salin Nilai")
                 }

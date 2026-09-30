@@ -762,7 +762,7 @@ fun ConnectionFormDialog(
                                 onSave(profile, password, sshPassword, createNew)
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = RaksysThemeColors.Primary,
+                                containerColor = RaksysThemeColors.PrimaryFill,
                                 contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(8.dp),

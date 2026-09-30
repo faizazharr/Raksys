@@ -184,7 +184,7 @@ fun QueryEditor(
                         }
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
-                    Text("Buka di Console ↗", fontSize = 10.sp, color = RaksysThemeColors.Primary)
+                    Text("Buka di Console ↗", fontSize = 11.sp, color = RaksysThemeColors.Primary)
                 }
             }
         }

@@ -128,7 +128,7 @@ fun QuickCreateLocalDbDialog(
                                 ) {
                                     DbTypeLogo(typeName = option.type.name, color = option.color, size = 18.dp)
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text(option.label, fontSize = 10.sp, color = RaksysThemeColors.TextPrimary)
+                                    Text(option.label, fontSize = 11.sp, color = RaksysThemeColors.TextPrimary)
                                 }
                             }
                         }
@@ -204,7 +204,7 @@ fun QuickCreateLocalDbDialog(
                                 onCreate(profile, password)
                             },
                             enabled = validationError == null && submitState !is UiState.Loading,
-                            colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary, contentColor = Color.White),
+                            colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill, contentColor = Color.White),
                             shape = RoundedCornerShape(8.dp),
                         ) {
                             if (submitState is UiState.Loading) {

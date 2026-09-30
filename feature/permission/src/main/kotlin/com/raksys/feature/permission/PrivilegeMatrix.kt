@@ -71,7 +71,7 @@ fun PrivilegeMatrix(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔍", fontSize = 10.sp)
+                    Text("🔍", fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     BasicTextField(
                         value = filterText,
@@ -81,7 +81,7 @@ fun PrivilegeMatrix(
                         modifier = Modifier.weight(1f),
                         decorationBox = { inner ->
                             if (filterText.isEmpty()) {
-                                Text("Filter tabel...", fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
+                                Text("Filter tabel...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                             }
                             inner()
                         }
@@ -89,7 +89,7 @@ fun PrivilegeMatrix(
                     if (filterText.isNotEmpty()) {
                         Text(
                             text = "✕",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = RaksysThemeColors.TextMuted,
                             modifier = Modifier.clickable { filterText = "" }.padding(2.dp)
                         )
@@ -196,7 +196,7 @@ fun PrivilegeMatrix(
                         ) {
                             Text(
                                 text = if (allGranted) "✕ Cabut" else "✓ Semua",
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }

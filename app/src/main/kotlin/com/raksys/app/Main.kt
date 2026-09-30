@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.raksys.core.database.DatabaseDriver
@@ -58,10 +59,19 @@ import org.koin.core.context.startKoin
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 
-enum class RelationalTab(val label: String, val icon: String) {
-    QUERY("Query Editor", "⚡"),
-    ERD("Visual ERD", "🗺️"),
-    PERMISSIONS("Roles & Permissions", "🛡️"),
+enum class RelationalTab(val label: String) {
+    QUERY("Query Editor"),
+    ERD("Visual ERD"),
+    PERMISSIONS("Roles & Permissions"),
+}
+
+@Composable
+private fun RelationalTabIcon(tab: RelationalTab, color: Color) {
+    when (tab) {
+        RelationalTab.QUERY -> QueryIcon(color)
+        RelationalTab.ERD -> ErdIcon(color)
+        RelationalTab.PERMISSIONS -> ShieldIcon(color)
+    }
 }
 
 @Composable
@@ -88,10 +98,9 @@ private fun RelationalTabBar(
                     .clip(RoundedCornerShape(6.dp))
                     .background(if (!isSidebarVisible) RaksysThemeColors.PrimaryContainer else RaksysThemeColors.SurfaceElevated)
             ) {
-                Text(
-                    text = if (isSidebarVisible) "◧" else "☰",
-                    fontSize = 13.sp,
-                    color = if (!isSidebarVisible) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
+                SidebarIcon(
+                    color = if (!isSidebarVisible) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary,
+                    sidebarOpen = isSidebarVisible,
                 )
             }
 
@@ -116,15 +125,19 @@ private fun RelationalTabBar(
                                 color = if (isSelected) RaksysThemeColors.Primary.copy(alpha = 0.6f) else Color.Transparent,
                                 shape = RoundedCornerShape(5.dp)
                             )
+                            .raksysInteractive(RoundedCornerShape(5.dp), enabled = !isSelected)
                             .clickable { onSelect(tab) }
-                            .padding(horizontal = 12.dp, vertical = 5.dp),
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(tab.icon, fontSize = 12.sp)
+                        RelationalTabIcon(
+                            tab = tab,
+                            color = if (isSelected) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary,
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = tab.label,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary,
                         )
@@ -198,24 +211,50 @@ fun main() {
                 },
                 title = "Raksys Database Studio",
                 icon = androidx.compose.ui.res.painterResource("icon.png"),
-                onKeyEvent = { keyEvent ->
-                    if (keyEvent.type == KeyEventType.KeyDown &&
-                        (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) &&
-                        keyEvent.key == Key.K
-                    ) {
-                        isCommandPaletteOpen = !isCommandPaletteOpen
-                        true
-                    } else if (keyEvent.type == KeyEventType.KeyDown &&
-                        (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) &&
-                        keyEvent.key == Key.B
-                    ) {
-                        isSidebarVisible = !isSidebarVisible
-                        true
-                    } else {
-                        false
+            ) {
+                val mod = RaksysPlatform.isMac
+                val isRelational = selectedProfile?.dbType?.family == DbFamily.RELATIONAL
+                MenuBar {
+                    Menu("File") {
+                        Item(
+                            "New Connection…",
+                            shortcut = KeyShortcut(Key.N, meta = mod, ctrl = !mod),
+                            onClick = { showAddConnectionDialog = true },
+                        )
+                    }
+                    Menu("View") {
+                        Item(
+                            if (isSidebarVisible) "Hide Sidebar" else "Show Sidebar",
+                            shortcut = KeyShortcut(Key.B, meta = mod, ctrl = !mod),
+                            onClick = { isSidebarVisible = !isSidebarVisible },
+                        )
+                        Item(
+                            "Command Palette",
+                            shortcut = KeyShortcut(Key.K, meta = mod, ctrl = !mod),
+                            onClick = { isCommandPaletteOpen = !isCommandPaletteOpen },
+                        )
+                    }
+                    Menu("Go") {
+                        Item(
+                            "Query Editor",
+                            shortcut = KeyShortcut(Key.One, meta = mod, ctrl = !mod),
+                            enabled = isRelational,
+                            onClick = { workspaceTab = RelationalTab.QUERY },
+                        )
+                        Item(
+                            "Visual ERD",
+                            shortcut = KeyShortcut(Key.Two, meta = mod, ctrl = !mod),
+                            enabled = isRelational,
+                            onClick = { workspaceTab = RelationalTab.ERD },
+                        )
+                        Item(
+                            "Roles & Permissions",
+                            shortcut = KeyShortcut(Key.Three, meta = mod, ctrl = !mod),
+                            enabled = isRelational,
+                            onClick = { workspaceTab = RelationalTab.PERMISSIONS },
+                        )
                     }
                 }
-            ) {
                 RaksysAppTheme {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Column(
@@ -223,6 +262,21 @@ fun main() {
                                 .fillMaxSize()
                                 .background(RaksysThemeColors.Background)
                         ) {
+                            // Environment edge: a 2 dp line across the window in the active connection's
+                            // environment color, so DEV / STG / PROD is visible from anywhere in the app.
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(2.dp)
+                                    .background(
+                                        when (selectedProfile?.environment) {
+                                            com.raksys.core.model.EnvironmentType.DEVELOPMENT -> RaksysThemeColors.EnvDev
+                                            com.raksys.core.model.EnvironmentType.STAGING -> RaksysThemeColors.EnvStaging
+                                            com.raksys.core.model.EnvironmentType.PRODUCTION -> RaksysThemeColors.EnvProd
+                                            null -> RaksysThemeColors.Border
+                                        }
+                                    )
+                            )
                             Row(
                                 modifier = Modifier
                                     .weight(1f)
@@ -389,7 +443,7 @@ fun main() {
                                     else "${curr.host}:${curr.port} / ${curr.database.ifBlank { "default" }}"
                                     Text(
                                         text = "• $dbDesc",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
                                         color = RaksysThemeColors.TextMuted
                                     )
@@ -419,8 +473,8 @@ fun main() {
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = "⌘K Command Palette",
-                                        fontSize = 10.sp,
+                                        text = "${RaksysPlatform.shortcut("K")} Command Palette",
+                                        fontSize = 11.sp,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold,
                                         color = RaksysThemeColors.Primary
@@ -430,8 +484,8 @@ fun main() {
                                 Spacer(modifier = Modifier.width(10.dp))
 
                                 Text(
-                                    text = "⌘↵ Run SQL  •  ⌘B Sidebar",
-                                    fontSize = 10.sp,
+                                    text = "${RaksysPlatform.modLabel}↵ Run SQL  •  ${RaksysPlatform.shortcut("B")} Sidebar",
+                                    fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = RaksysThemeColors.TextMuted
                                 )

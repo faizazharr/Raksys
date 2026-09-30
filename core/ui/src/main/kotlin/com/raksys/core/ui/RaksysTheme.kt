@@ -14,13 +14,17 @@ object RaksysThemeColors {
     val Border = Color(0xFF313846)
     val BorderLight = Color(0xFF454E60)
 
-    val Primary = Color(0xFF4F8CF6)
-    val PrimaryDark = Color(0xFF3070E6)
+    // Accent for text, icons, and borders on dark surfaces (6.8:1 on Surface).
+    val Primary = Color(0xFF78A9FA)
+    // Accent for filled controls that carry white text (5.2:1). Never use Primary as a fill behind white text.
+    val PrimaryFill = Color(0xFF2B67D6)
+    val PrimaryDark = PrimaryFill
     val PrimaryContainer = Color(0xFF1E3258)
 
     val TextPrimary = Color(0xFFF1F5F9)
     val TextSecondary = Color(0xFFA0AEC0)
-    val TextMuted = Color(0xFF718096)
+    // Tertiary text. 5.7:1 on Surface, 4.9:1 on SurfaceElevated (WCAG AA needs 4.5:1 for small text).
+    val TextMuted = Color(0xFF98A4B8)
 
     val Success = Color(0xFF34D399)
     val SuccessBg = Color(0xFF0D3325)
@@ -44,12 +48,22 @@ object RaksysThemeColors {
     val RedisColor = Color(0xFFF87171)
 
     // Environment Colors
+    // Environment identity: the Env* color marks dots, edges, and borders; the *Text color is the
+    // legible label color on the matching *Bg (all above 5:1).
     val EnvDev = Color(0xFF10B981)
     val EnvDevBg = Color(0xFF064E3B)
+    val EnvDevText = Color(0xFF6EE7B7)
     val EnvStaging = Color(0xFFF59E0B)
     val EnvStagingBg = Color(0xFF78350F)
+    val EnvStagingText = Color(0xFFFCD34D)
     val EnvProd = Color(0xFFEF4444)
     val EnvProdBg = Color(0xFF7F1D1D)
+    val EnvProdText = Color(0xFFFCA5A5)
+    // Filled destructive controls that carry white text (5.6:1).
+    val EnvProdFill = Color(0xFFC62828)
+
+    // Keyboard focus ring.
+    val FocusRing = Color(0xFF78A9FA)
 
     // Splitter / Handle Colors
     val SplitterHover = Color(0xFF4F8CF6)
@@ -59,7 +73,7 @@ object RaksysThemeColors {
 fun RaksysAppTheme(content: @Composable () -> Unit) {
     val colorScheme = darkColorScheme(
         primary = RaksysThemeColors.Primary,
-        onPrimary = Color.White,
+        onPrimary = Color(0xFF0B1220),
         primaryContainer = RaksysThemeColors.PrimaryContainer,
         onPrimaryContainer = Color(0xFFDCE7FE),
         surface = RaksysThemeColors.Surface,

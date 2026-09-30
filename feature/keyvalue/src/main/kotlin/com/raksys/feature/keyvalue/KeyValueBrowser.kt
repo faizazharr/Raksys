@@ -101,7 +101,7 @@ fun KeyValueBrowser(
                     onClick = { scope.launch { presenter.onEvent(KeyValueEvent.Scan(profile, pattern)) } },
                     enabled = state !is UiState.Loading,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RaksysThemeColors.Primary,
+                        containerColor = RaksysThemeColors.PrimaryFill,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(6.dp),
@@ -234,6 +234,7 @@ fun KeyValueBrowser(
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(RaksysThemeColors.Surface)
                                         .border(1.dp, RaksysThemeColors.Border, RoundedCornerShape(8.dp))
+                                        .raksysInteractive(RoundedCornerShape(8.dp))
                                         .clickable { inspectingEntry = entry }
                                         .padding(10.dp)
                                 ) {
@@ -266,7 +267,7 @@ fun KeyValueBrowser(
                                                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                                                 modifier = Modifier.height(22.dp)
                                             ) {
-                                                Text("📋 Salin", fontSize = 10.sp)
+                                                Text("📋 Salin", fontSize = 11.sp)
                                             }
                                         }
                                     }
@@ -345,7 +346,7 @@ fun KeyValueBrowser(
                         ToastManager.show("Value Redis disalin ke clipboard")
                         inspectingEntry = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary)
+                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill)
                 ) {
                     Text("Salin Value")
                 }

@@ -78,7 +78,7 @@ fun WelcomeWorkspace(
             Button(
                 onClick = onNewConnection,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RaksysThemeColors.Primary,
+                    containerColor = RaksysThemeColors.PrimaryFill,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(6.dp),
@@ -403,7 +403,7 @@ private fun QuickActionStep(
             modifier = Modifier
                 .size(22.dp)
                 .clip(CircleShape)
-                .background(RaksysThemeColors.Primary),
+                .background(RaksysThemeColors.PrimaryFill),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -487,7 +487,7 @@ private fun EngineInfoRow(
                 ) {
                     Text(
                         text = if (port == "File") "FILE" else ":$port",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.SemiBold,
                         color = color,
@@ -498,7 +498,7 @@ private fun EngineInfoRow(
                 }
             }
             Spacer(modifier = Modifier.height(2.dp))
-            Text(desc, fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
+            Text(desc, fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
         }
     }
 }

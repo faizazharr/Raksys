@@ -225,7 +225,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 val matchCount = tables.count { it.name.contains(erdSearchQuery, ignoreCase = true) }
                 Text(
                     text = "$matchCount/${tables.size}",
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     color = if (matchCount > 0) RaksysThemeColors.Primary else RaksysThemeColors.Error
@@ -235,7 +235,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                     onClick = { erdSearchQuery = "" },
                     modifier = Modifier.size(20.dp)
                 ) {
-                    Text("✕", fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
+                    Text("✕", fontSize = 11.sp, color = RaksysThemeColors.TextMuted)
                 }
             }
         }
@@ -289,7 +289,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                 modifier = Modifier.height(26.dp)
             ) {
-                Text("Fit 1:1", fontSize = 10.sp, color = RaksysThemeColors.Primary)
+                Text("Fit 1:1", fontSize = 11.sp, color = RaksysThemeColors.Primary)
             }
 
             Box(modifier = Modifier.height(16.dp).width(1.dp).background(RaksysThemeColors.Border))
@@ -300,12 +300,12 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                     copyToClipboard(mermaid)
                     ToastManager.show("Diagram Mermaid (${tables.size} tabel) disalin ke clipboard")
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary),
+                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.PrimaryFill),
                 shape = RoundedCornerShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 modifier = Modifier.height(26.dp)
             ) {
-                Text("📋 Export Mermaid", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("📋 Export Mermaid", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }
@@ -372,7 +372,7 @@ private fun TableErdCard(
                         column.foreignKey != null -> "🔗"
                         else -> "•"
                     }
-                    Text(marker, fontSize = 10.sp)
+                    Text(marker, fontSize = 11.sp)
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
                         text = column.name,
@@ -385,7 +385,7 @@ private fun TableErdCard(
                     )
                     Text(
                         text = column.type,
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = RaksysThemeColors.TextMuted,
                         maxLines = 1,

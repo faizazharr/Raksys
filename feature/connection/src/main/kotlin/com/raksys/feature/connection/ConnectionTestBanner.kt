@@ -73,13 +73,13 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                             )
                             Text(
                                 text = "Host & kredensial terhubung valid.",
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 color = Color(0xFFA7F3D0)
                             )
                         }
                     }
                     IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                        Text("✕", fontSize = 10.sp, color = Color(0xFFA7F3D0))
+                        Text("✕", fontSize = 11.sp, color = Color(0xFFA7F3D0))
                     }
                 }
             }
@@ -109,13 +109,13 @@ fun ConnectionTestBanner(state: UiState<Unit>, onDismiss: () -> Unit) {
                             )
                         }
                         IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                            Text("✕", fontSize = 10.sp, color = Color(0xFFFF7B72))
+                            Text("✕", fontSize = 11.sp, color = Color(0xFFFF7B72))
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = state.message,
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         color = Color(0xFFFFA198),
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
