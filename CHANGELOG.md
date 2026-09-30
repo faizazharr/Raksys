@@ -20,6 +20,10 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 - Search fields no longer clip their text (new `RaksysSearchField`); the ERD search box no longer covers the first tables; default window is 1280×800.
 
 ### Performance
+- **Fixed a regression** from the schema cache change: SQLite databases with many tables (about 40 or more) failed to load in the navigator and ERD ("too many terms in compound SELECT"). SQLite now reads columns per table; other engines still try the single bulk read and fall back per table if it is rejected. Covered by new tests (120 tables, key attachment, `_` in table names).
+- **ERD**: hovering no longer recomposes every table card (hover state is read per card through derived states), cards dim with a drawn wash instead of `alpha` layers, and each card uses a plain column list instead of its own `LazyColumn` (lazy only above 40 columns).
+- **Data grid**: rows receive their selection as plain values, so clicking a cell recomposes 2 rows instead of every visible row; cell text is capped at 200 characters for layout (the inspector still shows the full value), which keeps scrolling smooth on wide JSON / text columns.
+- **Memory**: the heap now shrinks back after large results (`-Xms32m`, `MinHeapFreeRatio=10`, `MaxHeapFreeRatio=30`): resident memory after scrolling a 10,000-row grid dropped from about 510 MB to 390 MB in a measured run.
 - Schema is cached per connection and read with one column query instead of one per table; idle pool connections are released after 60 s; Redis scans are pipelined and collection previews capped at 100 elements; the grid row filter is debounced.
 
 ### UI / Accessibility
