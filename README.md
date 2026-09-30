@@ -12,6 +12,8 @@
   <img src="https://img.shields.io/badge/JDK-17%2B-orange?style=flat-square&logo=openjdk&logoColor=white" alt="JDK 17">
   <img src="https://img.shields.io/badge/Databases-PostgreSQL%20|%20MySQL%20|%20SQLite%20|%20MongoDB%20|%20Redis-success?style=flat-square" alt="Supported databases">
   <img src="https://img.shields.io/badge/Privacy-Zero%20Telemetry-success?style=flat-square&logo=shield" alt="Zero Telemetry">
+  <a href="https://saweria.co/izarakuro"><img src="https://img.shields.io/badge/Support-Saweria-orange?style=flat-square&logo=coffeescript&logoColor=white" alt="Support on Saweria"></a>
+  <a href="https://ko-fi.com/izarakuro"><img src="https://img.shields.io/badge/Support-Ko--fi-red?style=flat-square&logo=kofi&logoColor=white" alt="Support on Ko-fi"></a>
 </p>
 
 ---
@@ -258,6 +260,27 @@ For module boundaries and design patterns, read [**`ARCHITECTURE.md`**](ARCHITEC
 6. **Tests for Pure Logic** — validators, URL builders, layouts, and formatters ship with unit tests.
 
 Full workflow, code style, and PR checklist: [**`CONTRIBUTING.md`**](CONTRIBUTING.md) · release process: [**`RELEASING.md`**](RELEASING.md).
+
+---
+
+## ☕ Support & Donations
+
+Raksys is a free, ad-free, and telemetry-free open-source project. If it helps you manage your databases, please consider supporting ongoing development and maintenance:
+
+<p align="center">
+  <a href="https://saweria.co/izarakuro">
+    <img src="https://img.shields.io/badge/Donate%20via-Saweria%20(Indonesia)-orange?style=for-the-badge&logo=coffeescript&logoColor=white" alt="Donate via Saweria" height="40">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://ko-fi.com/izarakuro">
+    <img src="https://img.shields.io/badge/Donate%20via-Ko--fi%20(International)-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Donate via Ko-fi" height="40">
+  </a>
+</p>
+
+- 🇮🇩 **Local Indonesia (Saweria)**: [**https://saweria.co/izarakuro**](https://saweria.co/izarakuro) *(Supports QRIS, GoPay, OVO, DANA, LinkAja, ShopeePay)*
+- 🌍 **International (Ko-fi)**: [**https://ko-fi.com/izarakuro**](https://ko-fi.com/izarakuro) *(Supports PayPal, Credit/Debit Cards, Apple Pay, Google Pay)*
+
+Every contribution goes toward new features, testing against more database versions, and keeping the project open and privacy-focused. Thank you! 🙏
 
 ---
 
