@@ -59,6 +59,33 @@ private fun copyToClipboard(text: String) {
 }
 
 @Composable
+private fun GridActionButton(label: String, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = RaksysThemeColors.TextSecondary),
+        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+            brush = androidx.compose.ui.graphics.SolidColor(RaksysThemeColors.Border)
+        ),
+        shape = RoundedCornerShape(4.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+        modifier = Modifier.height(28.dp)
+    ) {
+        Text(label, fontSize = 11.sp)
+    }
+}
+
+/** Asks where to save, writes the file, and reports the outcome in a toast. */
+private fun saveExport(suggestedName: String, content: String, withBom: Boolean, rows: Int) {
+    val file = chooseSaveFile(suggestedName) ?: return
+    try {
+        writeExport(file, content, withBom)
+        ToastManager.show("$rows baris disimpan ke ${file.name}")
+    } catch (e: Exception) {
+        ToastManager.show("Gagal menyimpan file: ${e.message ?: "tidak diketahui"}", isError = true)
+    }
+}
+
+@Composable
 fun DataGrid(
     result: QueryResult,
     modifier: Modifier = Modifier,
@@ -227,51 +254,19 @@ fun DataGrid(
                     }
                 }
 
-                OutlinedButton(
-                    onClick = {
-                        val csv = buildString {
-                            appendLine(result.columns.joinToString(",") { "\"${it.replace("\"", "\"\"")}\"" })
-                            displayRows.forEach { row ->
-                                appendLine(row.joinToString(",") { cell ->
-                                    if (cell == null) "" else "\"${cell.toString().replace("\"", "\"\"")}\""
-                                })
-                            }
-                        }
-                        copyToClipboard(csv)
-                        ToastManager.show("Data disalin ke clipboard sebagai CSV (${displayRows.size} baris)")
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = RaksysThemeColors.TextSecondary),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(RaksysThemeColors.Border)
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                    modifier = Modifier.height(24.dp)
-                ) {
-                    Text("Export CSV", fontSize = 11.sp)
+                GridActionButton("Salin CSV") {
+                    copyToClipboard(rowsToCsv(result.columns, displayRows))
+                    ToastManager.show("Data disalin ke clipboard sebagai CSV (${displayRows.size} baris)")
                 }
-
-                OutlinedButton(
-                    onClick = {
-                        val jsonRows = displayRows.map { row ->
-                            result.columns.mapIndexed { i, col ->
-                                val v = row.getOrNull(i)
-                                "\"$col\": " + if (v == null) "null" else "\"${v.toString().replace("\"", "\\\"")}\""
-                            }.joinToString(", ", "{ ", " }")
-                        }
-                        val json = "[\n  " + jsonRows.joinToString(",\n  ") + "\n]"
-                        copyToClipboard(json)
-                        ToastManager.show("Data disalin ke clipboard sebagai JSON (${displayRows.size} baris)")
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = RaksysThemeColors.TextSecondary),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(RaksysThemeColors.Border)
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                    modifier = Modifier.height(24.dp)
-                ) {
-                    Text("Export JSON", fontSize = 11.sp)
+                GridActionButton("Salin JSON") {
+                    copyToClipboard(rowsToJson(result.columns, displayRows))
+                    ToastManager.show("Data disalin ke clipboard sebagai JSON (${displayRows.size} baris)")
+                }
+                GridActionButton("Simpan CSV…") {
+                    saveExport("hasil-kueri.csv", rowsToCsv(result.columns, displayRows), withBom = true, rows = displayRows.size)
+                }
+                GridActionButton("Simpan JSON…") {
+                    saveExport("hasil-kueri.json", rowsToJson(result.columns, displayRows), withBom = false, rows = displayRows.size)
                 }
             }
         }

@@ -14,4 +14,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
+    testImplementation(libs.kotlin.test.junit5)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

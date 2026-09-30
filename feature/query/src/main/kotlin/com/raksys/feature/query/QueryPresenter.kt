@@ -1,11 +1,13 @@
 package com.raksys.feature.query
 
+import kotlinx.serialization.Serializable
 import com.raksys.core.database.DatabaseDriver
 import com.raksys.core.model.QueryResult
 import com.raksys.core.model.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+@Serializable
 data class QueryHistoryItem(
     val id: String = java.util.UUID.randomUUID().toString(),
     val sql: String,
@@ -16,7 +18,10 @@ data class QueryHistoryItem(
     val errorMessage: String? = null,
 )
 
-class QueryPresenter(private val driver: DatabaseDriver) {
+class QueryPresenter(
+    private val driver: DatabaseDriver,
+    private val historyStore: QueryHistoryStore = InMemoryQueryHistoryStore(),
+) {
     private val _state = MutableStateFlow<UiState<QueryResult>>(UiState.Idle)
     val state: StateFlow<UiState<QueryResult>> = _state
 
@@ -24,6 +29,13 @@ class QueryPresenter(private val driver: DatabaseDriver) {
     val history: StateFlow<List<QueryHistoryItem>> = _history
 
     private var activeProfileId: String? = null
+
+    /** Newest first, capped at [MAX_HISTORY], written to the store for the connection that ran it. */
+    private fun record(profileId: String, item: QueryHistoryItem) {
+        val updated = (listOf(item) + historyStore.load(profileId)).take(MAX_HISTORY)
+        historyStore.save(profileId, updated)
+        if (activeProfileId == profileId) _history.value = updated
+    }
 
     suspend fun onEvent(event: QueryEvent) {
         when (event) {
@@ -34,6 +46,7 @@ class QueryPresenter(private val driver: DatabaseDriver) {
                     if (state.value is UiState.Loading) driver.cancel()
                     _state.value = UiState.Idle
                     activeProfileId = event.profileId
+                    _history.value = historyStore.load(event.profileId)
                 }
             }
             is QueryEvent.Execute -> {
@@ -51,7 +64,7 @@ class QueryPresenter(private val driver: DatabaseDriver) {
                             rowCount = it.rows.size,
                             isSuccess = true,
                         )
-                        _history.value = (listOf(item) + _history.value).take(100)
+                        record(event.profile.id, item)
                     }
                     .onFailure {
                         val msg = it.message ?: "Query failed"
@@ -63,11 +76,16 @@ class QueryPresenter(private val driver: DatabaseDriver) {
                             isSuccess = false,
                             errorMessage = msg,
                         )
-                        _history.value = (listOf(item) + _history.value).take(100)
+                        record(event.profile.id, item)
                     }
             }
             QueryEvent.Cancel -> driver.cancel()
-            QueryEvent.ClearHistory -> _history.value = emptyList()
+            QueryEvent.ClearHistory -> {
+                activeProfileId?.let { historyStore.save(it, emptyList()) }
+                _history.value = emptyList()
+            }
         }
     }
 }
+
+private const val MAX_HISTORY = 100

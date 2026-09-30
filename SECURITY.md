@@ -17,6 +17,7 @@ Raksys **does not collect, harvest, or store any private information or telemetr
 | **Database passwords** | Stored in the OS keyring (Apple Keychain, Windows Credential Manager, or Secret Service) under service `com.raksys.dbtool`. |
 | **SSH passwords** | Stored in the OS keyring under `<profileId>:ssh`. |
 | **SSH private keys** | Only the *file path* is saved; the key file is read from disk at connect time and never copied. |
+| **Query history** | `~/.raksys/history/`, one file per connection, owner-only permissions on POSIX; not encrypted (may contain query literals). |
 | **Profile file** | `~/.raksys/connections.json` holds non-secret settings only (name, engine, host, port, database, username, flags, environment). |
 | **SSH host trust** | Verified against `~/.ssh/known_hosts`. Unknown hosts / missing file ⇒ connection refused (no silent trust-on-first-use). |
 | **Transport encryption** | Optional SSL/TLS toggle for PostgreSQL (`sslmode=require`), MySQL (`useSSL=true&requireSSL=true`), and MongoDB (`ssl=true`). |
@@ -35,7 +36,7 @@ Please be aware of these when deciding how to use Raksys:
 - **The SQL console executes what you type.** Use a read-only database role for exploratory work on sensitive systems.
 - **Redis SSL is not configurable** in the current version; use an SSH tunnel for untrusted networks.
 - **Linux** requires a running Secret Service provider (e.g. GNOME Keyring, KWallet) to save credentials.
-- **Query history is in-memory** and may contain sensitive literals; it is cleared when the app closes or when you press *Bersihkan*.
+- **Query history is saved to disk** (last 100 statements per connection, `~/.raksys/history/<connection>.json`) and can contain literal values you typed into queries, including sensitive ones. Files are readable by the owner only where the OS supports it. Press *Bersihkan* in the history drawer to delete a connection's history, or delete the `~/.raksys/history` folder. History files of deleted connections stay until you remove them.
 - Privilege listing for PostgreSQL is scoped to the `public` schema.
 
 **Recommended practice**: connect with the least-privileged account that does the job, tag production connections as `PROD`, and prefer SSH tunnels over exposing database ports.

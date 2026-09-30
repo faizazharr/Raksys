@@ -222,6 +222,12 @@ fun main() {
                 MenuBar {
                     Menu("File") {
                         Item(
+                            "New Query Tab",
+                            shortcut = KeyShortcut(Key.T, meta = mod, ctrl = !mod),
+                            enabled = isRelational && workspaceTab == RelationalTab.QUERY,
+                            onClick = { RaksysCommands.requestNewQueryTab() },
+                        )
+                        Item(
                             "New Connection…",
                             shortcut = KeyShortcut(Key.N, meta = mod, ctrl = !mod),
                             onClick = { showAddConnectionDialog = true },

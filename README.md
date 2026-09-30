@@ -130,6 +130,7 @@ flowchart LR
 
 ### ⚡ 4. SQL Console with Syntax Highlighting
 - **RSyntaxTextArea Editor**: SQL syntax highlighting and one-click **⚡ Format** (uppercases keywords and tidies clauses).
+- **Multiple query tabs**: open several console tabs (`+` button or *File › New Query Tab*); each keeps its own SQL text.
 - **Run / Cancel**: `⌘↵` / `Ctrl+↵` runs the query; **Cancel** aborts the in-flight statement.
 - **Safety Rails**: 30-second query timeout and a **10,000-row result cap** (with a visible "truncated" notice) keep a runaway `SELECT *` from freezing the app.
 - **Status Bar**: live state — idle, running, success (row count + execution time in ms), or failure with the database's error message.
@@ -137,9 +138,9 @@ flowchart LR
 ---
 
 ### 📜 5. Query History
-- **Automatic Log**: the last 100 executed statements are recorded with success/failure state, execution time, and row count.
+- **Automatic Log**: the last 100 statements per connection are recorded with success/failure state, execution time, and row count, and are still there after you restart the app.
 - **One-Click Reuse**: **⚡ Muat ke Editor** loads a past query back into the console; **📋 Salin** copies it.
-- **Session-Scoped**: history is held in memory only and can be cleared at any time.
+- **Local and clearable**: history is stored only on your machine (`~/.raksys/history/`) and can be cleared at any time. See [`SECURITY.md`](SECURITY.md) for what it may contain.
 
 ---
 
@@ -147,7 +148,7 @@ flowchart LR
 - **Schema Navigator**: filterable list of tables with column counts. Right-click actions: **Open Data (100 rows)**, **Copy Table Name**, **Copy SELECT Query**, **Copy DDL Template**.
 - **Paginated Browsing**: 100 rows per page with **‹ Prev / Next ›** controls, generated with safe `LIMIT/OFFSET` queries.
 - **Sortable, Filterable Grid**: click a header to sort ▲/▼, use the row filter to narrow results, and click any cell to inspect long values.
-- **Export in One Click**: copy the visible rows as **CSV** or **JSON** to the clipboard.
+- **Export in One Click**: copy the visible rows as **CSV** or **JSON**, or **save them to a file** (CSV is written as UTF-8 with BOM so Excel opens it correctly; JSON keeps numbers and `null` typed).
 
 ---
 

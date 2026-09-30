@@ -15,4 +15,11 @@ object RaksysCommands {
     fun requestRunQuery() {
         runQueryTick++
     }
+
+    var newQueryTabTick by mutableStateOf(0)
+        private set
+
+    fun requestNewQueryTab() {
+        newQueryTabTick++
+    }
 }

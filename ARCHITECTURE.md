@@ -137,6 +137,7 @@ Shared behaviors:
 | Data | Location | Format |
 |---|---|---|
 | Profiles (name, engine, host, port, database, username, SSL/SSH flags, environment) | `~/.raksys/connections.json` | Pretty-printed JSON via `kotlinx.serialization` |
+| Query history (last 100 per connection; may contain query literals) | `~/.raksys/history/<profileId>.json`, owner-only where supported | JSON via `kotlinx.serialization` |
 | Database password | OS keyring, service `com.raksys.dbtool`, key = `<profileId>` | Encrypted by the OS |
 | SSH password | OS keyring, key = `<profileId>:ssh` | Encrypted by the OS |
 

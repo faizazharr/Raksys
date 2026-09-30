@@ -4,6 +4,19 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Features
+- **Multiple SQL console tabs** with per-tab text, a `+` button, close buttons, and *File › New Query Tab*.
+- **Query history is saved per connection** under `~/.raksys/history/` (last 100, owner-only permissions where supported); *Bersihkan* deletes it from disk.
+- **Save results to a file**: *Simpan CSV…* / *Simpan JSON…* with a native save dialog. The JSON export now escapes quotes, backslashes, and line breaks correctly and keeps numbers, booleans, and `null` typed (it used to quote every value and break on newlines).
+
+### Fixes
+- Query results from one connection no longer stay on screen after switching to another.
+- SQLite and other passwordless connections work on machines without an OS keyring; only *saving* a password fails, with a clear message.
+- Search fields no longer clip their text (new `RaksysSearchField`); the ERD search box no longer covers the first tables; default window is 1280×800.
+
+### Performance
+- Schema is cached per connection and read with one column query instead of one per table; idle pool connections are released after 60 s; Redis scans are pipelined and collection previews capped at 100 elements; the grid row filter is debounced.
+
 ### UI / Accessibility
 - **Contrast fixes** (WCAG AA): muted text 4.0:1 → 5.7:1, accent text 4.9:1 → 6.8:1, white-on-accent buttons 3.3:1 → 5.2:1, PROD badge 2.7:1 → 5.3:1. Filled buttons now use the new `PrimaryFill` token; destructive confirm uses `EnvProdFill`.
 - **Minimum text size**: no text below 10 sp (previously 9 sp); captions and badges raised to 11 sp.

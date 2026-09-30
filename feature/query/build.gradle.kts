@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
 }
@@ -14,6 +15,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":feature:grid"))
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
     implementation(compose.desktop.currentOs)

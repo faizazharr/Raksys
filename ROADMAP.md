@@ -23,11 +23,11 @@ This document outlines planned milestones and ideas for **Raksys**. It is a livi
 ## 🔮 Upcoming Milestones
 
 ### 📌 Milestone 1: Editing & Multi-Tab Workflow (v0.2.0)
-- [ ] **Multiple query tabs** with per-tab results.
+- [x] **Multiple query tabs** (per-tab SQL text; per-tab results still to come).
 - [ ] **Saved queries / snippets** with persistence across sessions.
-- [ ] **Persistent query history** (opt-in, local only) with per-connection filtering.
+- [x] **Persistent query history** per connection, local only (an opt-in switch is still to come once Settings exists).
 - [ ] **Inline row editing** in the data grid (with a generated, reviewable `UPDATE` preview).
-- [ ] **Export to file** (CSV / JSON / SQL) instead of clipboard only.
+- [x] **Export to file** (CSV / JSON). SQL `INSERT` export still to come.
 
 ### 📌 Milestone 2: Deeper NoSQL Support (v0.3.0)
 - [ ] **MongoDB**: edit and delete documents, query by JSON filter, index viewer.

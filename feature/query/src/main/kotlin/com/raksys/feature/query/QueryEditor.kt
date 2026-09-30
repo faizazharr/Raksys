@@ -48,6 +48,7 @@ fun QueryEditor(
 
     var activeView by remember { mutableStateOf(QueryWorkspaceView.CONSOLE) }
     var userScratchpadSql by remember { mutableStateOf("SELECT 1 AS id, 'Hello Raksys' AS message;") }
+    var sqlTabs by remember { mutableStateOf(SqlTabs.initial(userScratchpadSql)) }
     var editorHeightDp by remember { mutableStateOf(180.dp) }
     var isHistoryOpen by remember { mutableStateOf(false) }
     var pendingDestructiveSql by remember { mutableStateOf<String?>(null) }
@@ -78,6 +79,20 @@ fun QueryEditor(
     LaunchedEffect(runTick) {
         if (runTick != initialRunTick && activeView == QueryWorkspaceView.CONSOLE && state !is UiState.Loading) {
             triggerExecution(textArea.text)
+        }
+    }
+
+    // Console tabs: keep each tab's text, swap the editor content when the active tab changes.
+    val switchToTabs: (SqlTabs) -> Unit = { next ->
+        sqlTabs = next
+        textArea.text = next.active.sql
+        userScratchpadSql = next.active.sql
+    }
+    val newTabTick = RaksysCommands.newQueryTabTick
+    val initialNewTabTick = remember { newTabTick }
+    LaunchedEffect(newTabTick) {
+        if (newTabTick != initialNewTabTick && activeView == QueryWorkspaceView.CONSOLE) {
+            switchToTabs(sqlTabs.withActiveText(textArea.text).add())
         }
     }
 
@@ -252,6 +267,13 @@ fun QueryEditor(
 
         // --- SQL Console Toolbar & Editor (Visible in CONSOLE mode) ---
         if (activeView == QueryWorkspaceView.CONSOLE) {
+            SqlTabBar(
+                tabs = sqlTabs,
+                onSelect = { id -> switchToTabs(sqlTabs.withActiveText(textArea.text).select(id)) },
+                onClose = { id -> switchToTabs(sqlTabs.withActiveText(textArea.text).close(id)) },
+                onAdd = { switchToTabs(sqlTabs.withActiveText(textArea.text).add()) },
+            )
+            HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
             QueryToolbar(
                 profile = profile,
                 isRunning = state is UiState.Loading,
