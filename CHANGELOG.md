@@ -5,7 +5,7 @@ All notable changes to **Raksys** are documented here. The format follows [Keep 
 ## [Unreleased]
 
 ### Documentation
-- Added full project documentation: `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `ROADMAP.md`, `RELEASING.md`, `DOWNLOAD.md`, `CODE_OF_CONDUCT.md`, issue / PR templates, and a screenshot guide.
+- Added full project documentation: `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `ROADMAP.md`, `RELEASING.md`, `DOWNLOAD.md`, `CODE_OF_CONDUCT.md`, donation info, a flow diagram, and issue / PR templates.
 
 ## v0.1.0 — Initial Development Build
 

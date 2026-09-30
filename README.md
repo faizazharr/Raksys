@@ -31,13 +31,74 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 
 ---
 
-## 🚀 Visual Product Tour & Feature Showcase
+## 🧭 How Raksys Works (Flow Diagram)
 
-> 📸 Screenshots live in [`docs/screenshots/`](docs/screenshots). See [`docs/screenshots/README.md`](docs/screenshots/README.md) for the list of expected files.
+The diagram below shows the whole user journey: from opening the app, to connecting, to the tools that appear depending on the database type you pick.
+
+```mermaid
+flowchart TD
+    A(["🚀 Open Raksys"]) --> B["🏠 Studio Workspace<br/>connection sidebar"]
+    B --> C{"Saved connection?"}
+    C -->|"No"| D["➕ New Connection wizard"]
+    C -->|"Yes"| H
+
+    D --> D1["Step 1: pick engine<br/>PostgreSQL · MySQL · SQLite · MongoDB · Redis"]
+    D1 --> D2["Step 2: host, port, database, credentials<br/>+ Environment tag DEV / STG / PROD"]
+    D2 --> D3{"Behind a private network?"}
+    D3 -->|"Yes"| D4["🚇 Enable SSH tunnel<br/>known_hosts verified"]
+    D3 -->|"No"| D5
+    D4 --> D5["⚡ Test Connection"]
+    D5 -->|"Failed"| D6["Friendly error message"] --> D2
+    D5 -->|"OK"| D7["💾 Save<br/>password → OS keyring<br/>profile → connections.json"]
+    D7 --> H["Select connection in sidebar"]
+
+    H --> I{"Engine family"}
+
+    I -->|"Relational: PostgreSQL · MySQL · SQLite"| R["Relational workspace"]
+    I -->|"Document: MongoDB"| M["Collections list"]
+    I -->|"Key-Value: Redis"| K["Key browser"]
+
+    R --> R1["⚡ Query Editor<br/>tables navigator + SQL console"]
+    R --> R2["🗺️ Visual ERD"]
+    R --> R3["🛡️ Roles & Permissions<br/>PostgreSQL / MySQL"]
+
+    R1 --> Q1["Browse table 100 rows/page<br/>or write SQL"]
+    Q1 --> Q2{"PROD connection and<br/>destructive SQL?"}
+    Q2 -->|"Yes"| Q3["🛡️ Confirmation dialog"]
+    Q3 -->|"Cancel"| Q1
+    Q3 -->|"Confirm"| Q4
+    Q2 -->|"No"| Q4["▶ Run SQL<br/>30s timeout · 10,000 row cap"]
+    Q4 --> Q5["📊 Data grid<br/>sort · filter · inspect · CSV/JSON export"]
+    Q4 --> Q6["📜 Query history"]
+    R1 --> Q7["🛠️ Table structure<br/>copy DDL / INSERT template"]
+
+    R2 --> E1["Auto layout from foreign keys<br/>zoom 40%–220%"]
+    R3 --> P1["Pick role → toggle SELECT / INSERT / UPDATE / DELETE"]
+    P1 --> P2["GRANT / REVOKE<br/>revoke asks confirmation"]
+
+    M --> M1["Pick collection → JSON documents<br/>filter · pretty/compact · copy"]
+    M1 --> M2["+ Add document<br/>live JSON validation"]
+
+    K --> K1["Pattern search with SCAN<br/>e.g. user:*"]
+    K1 --> K2["Type filter · TTL badge · copy value"]
+
+    B -.-> Z(["⌘K Command Palette<br/>jump to any table, connection, or tool"])
+```
+
+**Reading the diagram**
+
+| Step | What happens |
+|---|---|
+| **Connect** | Pick an engine, fill the details, optionally tunnel through SSH, test, and save. Secrets go to the OS keyring, never to disk in plain text. |
+| **Choose a workspace** | The engine family decides the tools you see: SQL tools, document browser, or key browser. |
+| **Work safely** | On `PROD`-tagged connections, risky SQL always asks for confirmation before running. |
+| **Navigate fast** | `⌘K` / `Ctrl+K` reaches any table, connection, or tool from anywhere. |
+
+---
+
+## 🚀 Feature Tour
 
 ### 🏠 1. Studio Workspace & Multi-Engine Connections
-![Studio Workspace](docs/screenshots/welcome-workspace.png)
-
 - **One Window, Five Engines**: PostgreSQL, MySQL/MariaDB, SQLite, MongoDB, and Redis share one connection sidebar and one workflow.
 - **Environment Tags**: mark every connection as `DEV`, `STG`, or `PROD` — the tag is color-coded in the connection list, the query toolbar, and the bottom status bar so you never confuse staging with production.
 - **Resizable, Collapsible Panels**: drag the splitters to resize the sidebar and navigator, or hide the sidebar with `⌘B` / `Ctrl+B`.
@@ -46,8 +107,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🔌 2. Guided Connection Wizard
-![Connection Wizard](docs/screenshots/connection-form.png)
-
 - **Two-Step Wizard**: pick the engine first, then fill only the fields that engine needs (SQLite asks for a file path; Redis asks for a database index 0–15; MongoDB requires a database name).
 - **Inline "Test Connection"**: verify host, port, and credentials *before* saving, with a friendly result banner.
 - **Create-Database-on-Connect**: for PostgreSQL and MySQL, flip *"Buat Database Baru di Server Ini"* and Raksys issues `CREATE DATABASE` for you, then saves the profile.
@@ -57,8 +116,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🚇 3. SSH Tunnel (Bastion) Support
-![SSH Tunnel Settings](docs/screenshots/connection-ssh.png)
-
 - **Private-Network Access**: reach databases behind a jump host with a local port-forward — works for every engine (JDBC, MongoDB, Redis).
 - **Password or Private-Key Auth**: authenticate to the bastion with a password (stored in the keyring) or a `.pem` / `.rsa` key file.
 - **Strict Host-Key Verification**: the bastion's host key is verified against your own `~/.ssh/known_hosts`. Unknown hosts are **refused**, not silently trusted.
@@ -66,8 +123,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### ⚡ 4. SQL Console with Syntax Highlighting
-![SQL Console](docs/screenshots/sql-console.png)
-
 - **RSyntaxTextArea Editor**: SQL syntax highlighting and one-click **⚡ Format** (uppercases keywords and tidies clauses).
 - **Run / Cancel**: `⌘↵` / `Ctrl+↵` runs the query; **Cancel** aborts the in-flight statement.
 - **Safety Rails**: 30-second query timeout and a **10,000-row result cap** (with a visible "truncated" notice) keep a runaway `SELECT *` from freezing the app.
@@ -76,8 +131,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 📜 5. Query History
-![Query History](docs/screenshots/query-history.png)
-
 - **Automatic Log**: the last 100 executed statements are recorded with success/failure state, execution time, and row count.
 - **One-Click Reuse**: **⚡ Muat ke Editor** loads a past query back into the console; **📋 Salin** copies it.
 - **Session-Scoped**: history is held in memory only and can be cleared at any time.
@@ -85,8 +138,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 📊 6. Data Grid & Table Browser
-![Data Grid](docs/screenshots/table-browser.png)
-
 - **Schema Navigator**: filterable list of tables with column counts. Right-click actions: **Open Data (100 rows)**, **Copy Table Name**, **Copy SELECT Query**, **Copy DDL Template**.
 - **Paginated Browsing**: 100 rows per page with **‹ Prev / Next ›** controls, generated with safe `LIMIT/OFFSET` queries.
 - **Sortable, Filterable Grid**: click a header to sort ▲/▼, use the row filter to narrow results, and click any cell to inspect long values.
@@ -95,8 +146,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🛠️ 7. Table Structure Inspector
-![Table Structure](docs/screenshots/table-structure.png)
-
 - **Column-Level Detail**: type, `🔑 PK` badges, `🔗 FK → table.column` badges, `NULL` / `NOT NULL`, and default values.
 - **Filter Columns & Types**: instant search across column names and data types.
 - **Copy DDL / INSERT Template**: generate a `CREATE TABLE` statement or an `INSERT … VALUES (?)` template from the live schema.
@@ -104,16 +153,12 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🛡️ 8. Production Safeguard
-![Production Safeguard](docs/screenshots/production-safeguard.png)
-
 - **Destructive-SQL Detection**: on connections tagged **PRODUCTION**, statements such as `DROP TABLE/DATABASE/SCHEMA/VIEW/INDEX`, `TRUNCATE`, `DELETE` without `WHERE`, `UPDATE` without `WHERE`, and `ALTER TABLE … DROP` require an explicit confirmation dialog that shows the exact SQL first.
 - **Zero Friction Elsewhere**: DEV and STG connections run without extra prompts.
 
 ---
 
 ### 🗺️ 9. Visual ERD
-![Visual ERD](docs/screenshots/visual-erd.png)
-
 - **Auto-Generated Diagram**: tables are laid out automatically from live foreign-key metadata and connected with Bézier relationship edges.
 - **Zoom Controls**: zoom from 40% to 220% or reset to 100%.
 - **Always in Sync**: the diagram is built directly from the connected database — no separate model file to maintain.
@@ -121,8 +166,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🔐 10. Roles & Permissions Matrix (PostgreSQL / MySQL)
-![Privileges Matrix](docs/screenshots/permissions-matrix.png)
-
 - **Real Catalog Data**: roles come from `pg_roles` / `information_schema`; privileges from each engine's grant tables.
 - **Per-Table Matrix**: toggle `SELECT`, `INSERT`, `UPDATE`, and `DELETE` per role per table — Raksys issues the real `GRANT` / `REVOKE`.
 - **Bulk Actions & Search**: filter tables and grant or revoke **all** privileges on a table with one click.
@@ -132,8 +175,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🍃 11. MongoDB Document Browser
-![MongoDB Browser](docs/screenshots/mongodb-viewer.png)
-
 - **Collection Explorer**: searchable list of collections with approximate document counts.
 - **JSON Viewer**: browse documents with pretty / compact toggle, filter by `_id` or keyword, and copy any document's JSON.
 - **Add Documents**: insert new documents with a live **JSON validity** indicator and a built-in **Rapi JSON** formatter.
@@ -141,8 +182,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### 🔑 12. Redis Key Browser
-![Redis Browser](docs/screenshots/redis-browser.png)
-
 - **Non-Blocking Key Scan**: uses cursor-based `SCAN` (never `KEYS *`) with a glob pattern such as `user:*`.
 - **Type-Aware Values**: `string`, `hash`, `list`, `set`, and `zset` values are rendered as readable text/JSON, with **TTL** badges.
 - **Type Filter Chips**: filter by type and see per-type counts at a glance.
@@ -150,8 +189,6 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 ---
 
 ### ⌨️ 13. Command Palette
-![Command Palette](docs/screenshots/command-palette.png)
-
 - **`⌘K` / `Ctrl+K`** opens a fuzzy launcher for **tables**, **connections**, and **navigation** (SQL Console, ERD, Permissions, New Connection, Toggle Sidebar).
 - Fully keyboard-driven: `↑` / `↓` to move, `↵` to run, `Esc` to close.
 
