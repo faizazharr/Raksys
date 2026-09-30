@@ -70,4 +70,33 @@ class ErdLayoutTest {
         val boxes = computeErdLayout(listOf(employees))
         assertTrue(computeErdEdges(boxes).isEmpty())
     }
+
+    @Test
+    fun `generateMermaidErd generates valid erDiagram with tables and foreign keys`() {
+        val users = table(
+            "users",
+            listOf(
+                ColumnDefinition("id", "int", nullable = false, isPrimaryKey = true),
+                ColumnDefinition("username", "varchar", nullable = false, isPrimaryKey = false)
+            )
+        )
+        val orders = table(
+            "orders",
+            listOf(
+                ColumnDefinition("order_id", "int", nullable = false, isPrimaryKey = true),
+                ColumnDefinition("user_id", "int", nullable = false, isPrimaryKey = false, foreignKey = ForeignKeyRef("users", "id"))
+            )
+        )
+
+        val mermaid = generateMermaidErd(listOf(users, orders))
+        assertTrue(mermaid.startsWith("erDiagram"))
+        assertTrue(mermaid.contains("users {"))
+        assertTrue(mermaid.contains("int id PK"))
+        assertTrue(mermaid.contains("varchar username"))
+        assertTrue(mermaid.contains("orders {"))
+        assertTrue(mermaid.contains("int user_id FK"))
+        assertTrue(mermaid.contains("users ||--o{ orders : \"user_id\""))
+    }
 }
+
+

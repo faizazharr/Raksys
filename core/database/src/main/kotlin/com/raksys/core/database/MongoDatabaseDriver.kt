@@ -81,6 +81,16 @@ class MongoDatabaseDriver(
             }
         }
 
+    override suspend fun insertDocument(profile: ConnectionProfile, collection: String, json: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                activeProfileId = profile.id
+                val doc = org.bson.Document.parse(json)
+                clientFor(profile).getDatabase(profile.database).getCollection(collection).insertOne(doc)
+                Unit
+            }
+        }
+
     override fun cancel() {
         // mongodb-driver-sync has no cooperative cancel for an in-flight blocking call.
         // Closing the active client forces the blocked socket read to fail; the client

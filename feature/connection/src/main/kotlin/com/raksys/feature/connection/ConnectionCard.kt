@@ -28,6 +28,8 @@ fun ConnectionCard(
     isTesting: Boolean,
     onClick: () -> Unit,
     onTest: () -> Unit,
+    onEdit: () -> Unit = {},
+    onClone: () -> Unit = {},
     onDelete: () -> Unit,
 ) {
     val (badgeColor, badgeBg) = when (profile.dbType) {
@@ -112,10 +114,28 @@ fun ConnectionCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
+                IconButton(
+                    onClick = onClone,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Text("📑", fontSize = 11.sp)
+                }
+
+                Spacer(modifier = Modifier.width(2.dp))
+
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Text("✏️", fontSize = 11.sp)
+                }
+
+                Spacer(modifier = Modifier.width(2.dp))
+
                 TextButton(
                     onClick = onTest,
                     enabled = !isTesting,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.height(26.dp)
                 ) {
                     if (isTesting) {
@@ -129,7 +149,7 @@ fun ConnectionCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(2.dp))
 
                 IconButton(
                     onClick = onDelete,

@@ -70,34 +70,36 @@ private fun typeColor(type: DbType): Color = when (type) {
 @Composable
 fun ConnectionFormDialog(
     initialDbType: DbType,
+    editingProfile: ConnectionProfile? = null,
     onDismiss: () -> Unit,
     onChangeType: () -> Unit,
     submitState: UiState<Unit>,
     onSave: (ConnectionProfile, password: String, sshPassword: String, createNew: Boolean) -> Unit,
 ) {
     val dbType = initialDbType
+    val isEditing = editingProfile != null
     // Only Postgres/MySQL have an explicit CREATE DATABASE step — Mongo creates a DB implicitly
     // on first write, Redis's numbered DBs always exist, and SQLite creates its file on connect.
     val createModeApplicable = dbType == DbType.POSTGRES || dbType == DbType.MYSQL
 
-    var name by remember { mutableStateOf("") }
-    var environment by remember { mutableStateOf(EnvironmentType.DEVELOPMENT) }
+    var name by remember { mutableStateOf(editingProfile?.name ?: "") }
+    var environment by remember { mutableStateOf(editingProfile?.environment ?: EnvironmentType.DEVELOPMENT) }
     var createNew by remember { mutableStateOf(false) }
-    var host by remember { mutableStateOf("localhost") }
-    var port by remember { mutableStateOf(defaultPort(dbType)) }
-    var database by remember { mutableStateOf(defaultDatabase(dbType)) }
-    var username by remember { mutableStateOf(defaultUsername(dbType)) }
+    var host by remember { mutableStateOf(editingProfile?.host ?: "localhost") }
+    var port by remember { mutableStateOf(editingProfile?.port?.toString() ?: defaultPort(dbType)) }
+    var database by remember { mutableStateOf(editingProfile?.database ?: defaultDatabase(dbType)) }
+    var username by remember { mutableStateOf(editingProfile?.username ?: defaultUsername(dbType)) }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
-    var sshEnabled by remember { mutableStateOf(false) }
-    var sshHost by remember { mutableStateOf("") }
-    var sshPort by remember { mutableStateOf("22") }
-    var sshUsername by remember { mutableStateOf("") }
-    var sshAuthMethod by remember { mutableStateOf(SshAuthMethod.PASSWORD) }
+    var sshEnabled by remember { mutableStateOf(editingProfile?.sshEnabled ?: false) }
+    var sshHost by remember { mutableStateOf(editingProfile?.sshHost ?: "") }
+    var sshPort by remember { mutableStateOf(editingProfile?.sshPort?.toString() ?: "22") }
+    var sshUsername by remember { mutableStateOf(editingProfile?.sshUsername ?: "") }
+    var sshAuthMethod by remember { mutableStateOf(editingProfile?.sshAuthMethod ?: SshAuthMethod.PASSWORD) }
     var sshPassword by remember { mutableStateOf("") }
     var isSshPasswordVisible by remember { mutableStateOf(false) }
-    var sshPrivateKeyPath by remember { mutableStateOf("") }
+    var sshPrivateKeyPath by remember { mutableStateOf(editingProfile?.sshPrivateKeyPath ?: "") }
 
     val sqlDriver = koinInject<DatabaseDriver>()
     val documentDriver = koinInject<DocumentDatabaseDriver>()
@@ -105,6 +107,19 @@ fun ConnectionFormDialog(
     val credentialStore = koinInject<CredentialStore>()
     val scope = rememberCoroutineScope()
     var inlineTestState by remember { mutableStateOf<UiState<Unit>>(UiState.Idle) }
+
+    LaunchedEffect(editingProfile?.id) {
+        editingProfile?.let { ep ->
+            val savedPass = credentialStore.get(ep.id)
+            if (!savedPass.isNullOrBlank()) {
+                password = savedPass
+            }
+            val savedSshPass = credentialStore.get("${ep.id}:ssh")
+            if (!savedSshPass.isNullOrBlank()) {
+                sshPassword = savedSshPass
+            }
+        }
+    }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = RaksysThemeColors.TextPrimary,
@@ -169,13 +184,13 @@ fun ConnectionFormDialog(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Koneksi ${dbType.name}",
+                                    text = if (isEditing) "Edit: ${editingProfile.name}" else "Koneksi ${dbType.name}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = RaksysThemeColors.TextPrimary
                                 )
                                 Text(
-                                    text = "Langkah 2 dari 2 — detail koneksi & otentikasi",
+                                    text = if (isEditing) "Perbarui parameter koneksi & kredensial tersimpan" else "Langkah 2 dari 2 — detail koneksi & otentikasi",
                                     fontSize = 11.sp,
                                     color = RaksysThemeColors.TextSecondary
                                 )
@@ -189,15 +204,17 @@ fun ConnectionFormDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    if (!isEditing) {
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "‹ Ganti tipe database",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = RaksysThemeColors.Primary,
-                        modifier = Modifier.clickable { onChangeType() }
-                    )
+                        Text(
+                            text = "‹ Ganti tipe database",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = RaksysThemeColors.Primary,
+                            modifier = Modifier.clickable { onChangeType() }
+                        )
+                    }
                 }
 
                 HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
@@ -651,7 +668,11 @@ fun ConnectionFormDialog(
                             DbFamily.KEY_VALUE -> keyValueDriver.testConnection(testProfile)
                         }
                         credentialStore.delete(tempId)
-                        sqlDriver.invalidate(tempId)
+                        when (dbType.family) {
+                            DbFamily.RELATIONAL -> sqlDriver.invalidate(tempId)
+                            DbFamily.DOCUMENT -> documentDriver.invalidate(tempId)
+                            DbFamily.KEY_VALUE -> keyValueDriver.invalidate(tempId)
+                        }
                         result
                             .onSuccess {
                                 inlineTestState = UiState.Success(Unit)
@@ -723,7 +744,7 @@ fun ConnectionFormDialog(
                             enabled = validationError == null && submitState !is UiState.Loading,
                             onClick = {
                                 val profile = ConnectionProfile(
-                                    id = UUID.randomUUID().toString(),
+                                    id = editingProfile?.id ?: UUID.randomUUID().toString(),
                                     name = name.ifBlank { "Untitled DB" },
                                     dbType = dbType,
                                     host = host,
@@ -761,7 +782,7 @@ fun ConnectionFormDialog(
                                 )
                             } else {
                                 Text(
-                                    if (createNew) "Buat & Simpan" else "Simpan Koneksi",
+                                    if (isEditing) "Perbarui Koneksi" else if (createNew) "Buat & Simpan" else "Simpan Koneksi",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
                                 )

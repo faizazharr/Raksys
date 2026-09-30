@@ -8,6 +8,7 @@ interface DocumentDatabaseDriver {
     suspend fun testConnection(profile: ConnectionProfile): Result<Unit>
     suspend fun listCollections(profile: ConnectionProfile): Result<List<CollectionInfo>>
     suspend fun findDocuments(profile: ConnectionProfile, collection: String, limit: Int = 100): Result<List<MongoDocument>>
+    suspend fun insertDocument(profile: ConnectionProfile, collection: String, json: String): Result<Unit>
     fun cancel()
     fun invalidate(profileId: String)
     fun close()

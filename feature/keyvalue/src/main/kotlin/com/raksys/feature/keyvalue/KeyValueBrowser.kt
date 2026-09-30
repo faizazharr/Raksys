@@ -45,6 +45,7 @@ fun KeyValueBrowser(
     val scope = rememberCoroutineScope()
     var pattern by remember { mutableStateOf("*") }
     var inspectingEntry by remember { mutableStateOf<RedisEntry?>(null) }
+    var selectedTypeFilter by remember { mutableStateOf("ALL") }
 
     LaunchedEffect(profile.id) { presenter.onEvent(KeyValueEvent.Scan(profile, pattern)) }
 
@@ -153,8 +154,80 @@ fun KeyValueBrowser(
                     if (current.data.isEmpty()) {
                         RaksysEmptyState(iconLabel = "🔑", title = "Tidak Ada Key", description = "Tidak ada key yang cocok dengan pola '$pattern'.")
                     } else {
-                        LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            items(current.data, key = { it.key }) { entry ->
+                        val types = listOf("ALL", "string", "hash", "list", "set", "zset")
+                        val filteredEntries = remember(current.data, selectedTypeFilter) {
+                            if (selectedTypeFilter == "ALL") current.data
+                            else current.data.filter { it.type.equals(selectedTypeFilter, ignoreCase = true) }
+                        }
+
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Filter Chips Row
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(RaksysThemeColors.SurfaceElevated)
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = "Tipe:",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = RaksysThemeColors.TextSecondary
+                                )
+                                types.forEach { typeKey ->
+                                    val count = if (typeKey == "ALL") current.data.size else current.data.count { it.type.equals(typeKey, ignoreCase = true) }
+                                    val isSelected = selectedTypeFilter == typeKey
+                                    val chipColor = if (typeKey == "ALL") RaksysThemeColors.Primary else when (typeKey) {
+                                        "string" -> Color(0xFF60A5FA)
+                                        "hash" -> Color(0xFF34D399)
+                                        "list" -> Color(0xFFFBBF24)
+                                        "set" -> Color(0xFFA78BFA)
+                                        "zset" -> Color(0xFFF472B6)
+                                        else -> RaksysThemeColors.TextSecondary
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(if (isSelected) chipColor.copy(alpha = 0.2f) else Color.Transparent)
+                                            .border(
+                                                width = 1.dp,
+                                                color = if (isSelected) chipColor else RaksysThemeColors.Border,
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .clickable { selectedTypeFilter = typeKey }
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    ) {
+                                        Text(
+                                            text = "$typeKey ($count)",
+                                            fontSize = 11.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) chipColor else RaksysThemeColors.TextSecondary
+                                        )
+                                    }
+                                }
+                            }
+
+                            HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
+
+                            if (filteredEntries.isEmpty()) {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "Tidak ada key dengan tipe '$selectedTypeFilter'",
+                                        fontSize = 12.sp,
+                                        color = RaksysThemeColors.TextMuted
+                                    )
+                                }
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    items(filteredEntries, key = { it.key }) { entry ->
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -220,7 +293,9 @@ fun KeyValueBrowser(
                 }
             }
         }
+        }
     }
+}
 
     // Detail Value Inspector Modal
     inspectingEntry?.let { entry ->

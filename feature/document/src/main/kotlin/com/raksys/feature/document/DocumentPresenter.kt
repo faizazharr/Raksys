@@ -14,6 +14,9 @@ class DocumentPresenter(private val driver: DocumentDatabaseDriver) {
     private val _documents = MutableStateFlow<UiState<List<MongoDocument>>>(UiState.Idle)
     val documents: StateFlow<UiState<List<MongoDocument>>> = _documents
 
+    private val _insertState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val insertState: StateFlow<UiState<Unit>> = _insertState
+
     suspend fun onEvent(event: DocumentEvent) {
         when (event) {
             is DocumentEvent.LoadCollections -> {
@@ -27,6 +30,20 @@ class DocumentPresenter(private val driver: DocumentDatabaseDriver) {
                 driver.findDocuments(event.profile, event.collection)
                     .onSuccess { _documents.value = UiState.Success(it) }
                     .onFailure { _documents.value = UiState.Error(it.message ?: "Failed to load documents") }
+            }
+            is DocumentEvent.InsertDocument -> {
+                _insertState.value = UiState.Loading
+                driver.insertDocument(event.profile, event.collection, event.json)
+                    .onSuccess {
+                        _insertState.value = UiState.Success(Unit)
+                        onEvent(DocumentEvent.LoadDocuments(event.profile, event.collection))
+                    }
+                    .onFailure {
+                        _insertState.value = UiState.Error(it.message ?: "Gagal menambahkan dokumen")
+                    }
+            }
+            DocumentEvent.ResetInsertState -> {
+                _insertState.value = UiState.Idle
             }
             DocumentEvent.Cancel -> driver.cancel()
         }

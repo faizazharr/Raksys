@@ -30,6 +30,11 @@ private enum class QueryWorkspaceView {
     TABLE_DATA
 }
 
+private enum class TableSubTab {
+    DATA,
+    STRUCTURE
+}
+
 @Composable
 fun QueryEditor(
     profile: ConnectionProfile,
@@ -73,6 +78,7 @@ fun QueryEditor(
     }
 
     var page by remember(browsingTable?.name) { mutableIntStateOf(0) }
+    var tableSubTab by remember(browsingTable?.name) { mutableStateOf(TableSubTab.DATA) }
 
     // When a table is selected in the navigator, switch to TABLE_DATA view safely without overwriting user scratchpad!
     LaunchedEffect(browsingTable?.name) {
@@ -185,6 +191,54 @@ fun QueryEditor(
 
         HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
 
+        // --- Table Sub-Tab Selector (Data vs Structure) ---
+        if (activeView == QueryWorkspaceView.TABLE_DATA && browsingTable != null) {
+            val rowsCount = (state as? UiState.Success)?.data?.rows?.size ?: 0
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(RaksysThemeColors.SurfaceElevated)
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    val isData = tableSubTab == TableSubTab.DATA
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(if (isData) RaksysThemeColors.PrimaryContainer else Color.Transparent)
+                            .clickable { tableSubTab = TableSubTab.DATA }
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "📋 Data Tabel ($rowsCount)",
+                            fontSize = 11.sp,
+                            fontWeight = if (isData) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isData) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
+                        )
+                    }
+
+                    val isStructure = tableSubTab == TableSubTab.STRUCTURE
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(if (isStructure) RaksysThemeColors.PrimaryContainer else Color.Transparent)
+                            .clickable { tableSubTab = TableSubTab.STRUCTURE }
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "🛠️ Struktur Kolom & Kunci (${browsingTable.columns.size})",
+                            fontSize = 11.sp,
+                            fontWeight = if (isStructure) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isStructure) RaksysThemeColors.Primary else RaksysThemeColors.TextSecondary
+                        )
+                    }
+                }
+            }
+            HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
+        }
+
         // --- SQL Console Toolbar & Editor (Visible in CONSOLE mode) ---
         if (activeView == QueryWorkspaceView.CONSOLE) {
             QueryToolbar(
@@ -217,8 +271,8 @@ fun QueryEditor(
 
         QueryStatusBar(state)
 
-        // --- Pagination Bar (Visible in TABLE_DATA mode) ---
-        if (activeView == QueryWorkspaceView.TABLE_DATA && browsingTable != null) {
+        // --- Pagination Bar (Visible in TABLE_DATA mode and DATA subtab) ---
+        if (activeView == QueryWorkspaceView.TABLE_DATA && tableSubTab == TableSubTab.DATA && browsingTable != null) {
             HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
             val rowsOnPage = (state as? UiState.Success)?.data?.rows?.size ?: 0
             TablePaginationBar(
@@ -241,7 +295,10 @@ fun QueryEditor(
                 .fillMaxWidth()
                 .background(RaksysThemeColors.Background)
         ) {
-            when (val current = state) {
+            if (activeView == QueryWorkspaceView.TABLE_DATA && tableSubTab == TableSubTab.STRUCTURE && browsingTable != null) {
+                TableStructureInspector(table = browsingTable)
+            } else {
+                when (val current = state) {
                 is UiState.Idle -> {
                     RaksysEmptyState(
                         iconLabel = "⌨️",
@@ -282,6 +339,7 @@ fun QueryEditor(
             }
         }
     }
+}
 
     if (isHistoryOpen) {
         VerticalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)

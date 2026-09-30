@@ -5,5 +5,7 @@ import com.raksys.core.model.ConnectionProfile
 sealed interface DocumentEvent {
     data class LoadCollections(val profile: ConnectionProfile) : DocumentEvent
     data class LoadDocuments(val profile: ConnectionProfile, val collection: String) : DocumentEvent
+    data class InsertDocument(val profile: ConnectionProfile, val collection: String, val json: String) : DocumentEvent
+    data object ResetInsertState : DocumentEvent
     data object Cancel : DocumentEvent
 }

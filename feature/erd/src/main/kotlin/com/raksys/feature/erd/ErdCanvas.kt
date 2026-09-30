@@ -27,7 +27,52 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.TableSchema
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.ToastManager
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import kotlin.math.abs
+
+private fun copyToClipboard(text: String) {
+    try {
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(StringSelection(text), null)
+    } catch (_: Exception) {}
+}
+
+/**
+ * Generates official Mermaid ER Diagram Markdown string from table schemas.
+ */
+fun generateMermaidErd(tables: List<TableSchema>): String {
+    val sb = StringBuilder("erDiagram\n")
+    // 1. Tables and columns definition
+    tables.forEach { table ->
+        sb.append("    ${table.name} {\n")
+        table.columns.forEach { col ->
+            val cleanType = col.type.replace(Regex("[^a-zA-Z0-9_]"), "_").lowercase().ifBlank { "string" }
+            val keyTag = when {
+                col.isPrimaryKey -> " PK"
+                col.foreignKey != null -> " FK"
+                else -> ""
+            }
+            sb.append("        $cleanType ${col.name}$keyTag\n")
+        }
+        sb.append("    }\n")
+    }
+
+    // 2. Foreign Key relationships
+    val addedEdges = mutableSetOf<String>()
+    tables.forEach { table ->
+        table.columns.forEach { col ->
+            col.foreignKey?.let { fk ->
+                val edgeKey = "${fk.referencedTable}-->${table.name}:${col.name}"
+                if (addedEdges.add(edgeKey)) {
+                    sb.append("    ${fk.referencedTable} ||--o{ ${table.name} : \"${col.name}\"\n")
+                }
+            }
+        }
+    }
+    return sb.toString()
+}
 
 @Composable
 fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
@@ -36,6 +81,7 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
 
     var zoomScale by remember { mutableStateOf(1f) }
     var hoveredTableName by remember { mutableStateOf<String?>(null) }
+    var erdSearchQuery by remember { mutableStateOf("") }
 
     // Find all tables directly related to the hovered table
     val relatedTableNames = remember(hoveredTableName, edges) {
@@ -117,22 +163,79 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
 
                 // Table Cards
                 boxes.forEach { box ->
-                    val isTableHovered = hoveredTableName == box.table.name
-                    val isTableRelated = relatedTableNames.contains(box.table.name)
-                    val tableAlpha = if (hoveredTableName == null || isTableRelated) 1.0f else 0.4f
+                    key(box.table.name) {
+                        val isSearchMatch = erdSearchQuery.isNotBlank() && box.table.name.contains(erdSearchQuery, ignoreCase = true)
+                        val isTableHovered = hoveredTableName == box.table.name
+                        val isTableRelated = relatedTableNames.contains(box.table.name)
 
-                    TableErdCard(
-                        table = box.table,
-                        isHighlighted = isTableHovered || (hoveredTableName != null && isTableRelated),
-                        onHoverChange = { isHovered ->
-                            hoveredTableName = if (isHovered) box.table.name else null
-                        },
-                        modifier = Modifier
-                            .offset(x = box.xDp.dp, y = box.yDp.dp)
-                            .width(box.widthDp.dp)
-                            .height(box.heightDp.dp)
-                            .alpha(tableAlpha),
-                    )
+                        val tableAlpha = when {
+                            erdSearchQuery.isNotBlank() && !isSearchMatch -> 0.25f
+                            hoveredTableName == null || isTableRelated || isSearchMatch -> 1.0f
+                            else -> 0.4f
+                        }
+
+                        TableErdCard(
+                            table = box.table,
+                            isHighlighted = isSearchMatch || isTableHovered || (hoveredTableName != null && isTableRelated),
+                            onHoverChange = { isHovered ->
+                                hoveredTableName = if (isHovered) box.table.name else null
+                            },
+                            modifier = Modifier
+                                .offset(x = box.xDp.dp, y = box.yDp.dp)
+                                .width(box.widthDp.dp)
+                                .height(box.heightDp.dp)
+                                .alpha(tableAlpha),
+                        )
+                    }
+                }
+            }
+        }
+
+        // Floating Table Search Bar (Top Left)
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(14.dp)
+                .shadow(6.dp, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .background(RaksysThemeColors.SurfaceElevated)
+                .border(1.dp, RaksysThemeColors.BorderLight, RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = erdSearchQuery,
+                onValueChange = { erdSearchQuery = it },
+                placeholder = { Text("🔍 Cari tabel di ERD...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
+                singleLine = true,
+                shape = RoundedCornerShape(6.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RaksysThemeColors.Primary,
+                    unfocusedBorderColor = RaksysThemeColors.Border,
+                    focusedContainerColor = RaksysThemeColors.Background,
+                    unfocusedContainerColor = RaksysThemeColors.Background,
+                    focusedTextColor = RaksysThemeColors.TextPrimary,
+                    unfocusedTextColor = RaksysThemeColors.TextPrimary,
+                ),
+                modifier = Modifier.width(180.dp).height(30.dp)
+            )
+
+            if (erdSearchQuery.isNotBlank()) {
+                Spacer(modifier = Modifier.width(6.dp))
+                val matchCount = tables.count { it.name.contains(erdSearchQuery, ignoreCase = true) }
+                Text(
+                    text = "$matchCount/${tables.size}",
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = if (matchCount > 0) RaksysThemeColors.Primary else RaksysThemeColors.Error
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                IconButton(
+                    onClick = { erdSearchQuery = "" },
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Text("✕", fontSize = 10.sp, color = RaksysThemeColors.TextMuted)
                 }
             }
         }
@@ -187,6 +290,22 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 modifier = Modifier.height(26.dp)
             ) {
                 Text("Fit 1:1", fontSize = 10.sp, color = RaksysThemeColors.Primary)
+            }
+
+            Box(modifier = Modifier.height(16.dp).width(1.dp).background(RaksysThemeColors.Border))
+
+            Button(
+                onClick = {
+                    val mermaid = generateMermaidErd(tables)
+                    copyToClipboard(mermaid)
+                    ToastManager.show("Diagram Mermaid (${tables.size} tabel) disalin ke clipboard")
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary),
+                shape = RoundedCornerShape(6.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                modifier = Modifier.height(26.dp)
+            ) {
+                Text("📋 Export Mermaid", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }

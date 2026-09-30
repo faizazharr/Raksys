@@ -89,6 +89,48 @@ private fun formatJsonPretty(raw: String): String {
     return sb.toString()
 }
 
+private fun isValidJsonSyntax(raw: String): Boolean {
+    val trimmed = raw.trim()
+    if ((!trimmed.startsWith("{") || !trimmed.endsWith("}")) &&
+        (!trimmed.startsWith("[") || !trimmed.endsWith("]"))
+    ) return false
+
+    var braceCount = 0
+    var bracketCount = 0
+    var inQuotes = false
+    var escape = false
+
+    for (char in trimmed) {
+        if (escape) {
+            escape = false
+            continue
+        }
+        if (char == '\\') {
+            escape = true
+            continue
+        }
+        if (char == '"') {
+            inQuotes = !inQuotes
+            continue
+        }
+        if (inQuotes) continue
+
+        when (char) {
+            '{' -> braceCount++
+            '}' -> {
+                braceCount--
+                if (braceCount < 0) return false
+            }
+            '[' -> bracketCount++
+            ']' -> {
+                bracketCount--
+                if (bracketCount < 0) return false
+            }
+        }
+    }
+    return !inQuotes && braceCount == 0 && bracketCount == 0
+}
+
 @Composable
 fun DocumentCollectionList(
     profile: ConnectionProfile,
@@ -221,11 +263,21 @@ fun DocumentViewer(
 ) {
     val presenter = koinInject<DocumentPresenter>()
     val state by presenter.documents.collectAsState()
+    val insertState by presenter.insertState.collectAsState()
     val scope = rememberCoroutineScope()
     var searchDocQuery by remember { mutableStateOf("") }
     var isPrettyFormatted by remember { mutableStateOf(true) }
+    var isAddDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(collection) { presenter.onEvent(DocumentEvent.LoadDocuments(profile, collection)) }
+
+    LaunchedEffect(insertState) {
+        if (insertState is UiState.Success) {
+            ToastManager.show("✓ Dokumen berhasil ditambahkan ke '$collection'")
+            isAddDialogOpen = false
+            presenter.onEvent(DocumentEvent.ResetInsertState)
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize().background(RaksysThemeColors.Background)) {
         // Unified Header (46.dp)
@@ -256,6 +308,24 @@ fun DocumentViewer(
                     fontWeight = FontWeight.Bold,
                     color = RaksysThemeColors.TextPrimary
                 )
+                Spacer(modifier = Modifier.width(6.dp))
+
+                val docCount = (state as? UiState.Success)?.data?.size ?: 0
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(RaksysThemeColors.SurfaceElevated)
+                        .border(1.dp, RaksysThemeColors.Border, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "$docCount Dokumen",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = RaksysThemeColors.TextSecondary
+                    )
+                }
+
                 Spacer(modifier = Modifier.width(12.dp))
 
                 OutlinedTextField(
@@ -275,6 +345,17 @@ fun DocumentViewer(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Add Document Button
+                Button(
+                    onClick = { isAddDialogOpen = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary),
+                    shape = RoundedCornerShape(5.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Text("+ Tambah Dokumen", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+
                 // Format toggle button
                 OutlinedButton(
                     onClick = { isPrettyFormatted = !isPrettyFormatted },
@@ -283,7 +364,7 @@ fun DocumentViewer(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text(if (isPrettyFormatted) "Mode: Rapi (Pretty)" else "Mode: Compact", fontSize = 10.sp)
+                    Text(if (isPrettyFormatted) "Mode: Rapi" else "Mode: Compact", fontSize = 10.sp)
                 }
 
                 IconButton(
@@ -315,8 +396,10 @@ fun DocumentViewer(
                     onRetry = { scope.launch { presenter.onEvent(DocumentEvent.LoadDocuments(profile, collection)) } },
                 )
                 is UiState.Success -> {
-                    val filteredDocs = current.data.filter {
-                        searchDocQuery.isBlank() || it.id.contains(searchDocQuery, ignoreCase = true) || it.json.contains(searchDocQuery, ignoreCase = true)
+                    val filteredDocs = remember(current.data, searchDocQuery) {
+                        current.data.filter {
+                            searchDocQuery.isBlank() || it.id.contains(searchDocQuery, ignoreCase = true) || it.json.contains(searchDocQuery, ignoreCase = true)
+                        }
                     }
 
                     if (filteredDocs.isEmpty()) {
@@ -364,7 +447,9 @@ fun DocumentViewer(
 
                                     Spacer(modifier = Modifier.height(6.dp))
 
-                                    val displayText = if (isPrettyFormatted) formatJsonPretty(document.json) else document.json
+                                    val displayText = remember(document.json, isPrettyFormatted) {
+                                        if (isPrettyFormatted) formatJsonPretty(document.json) else document.json
+                                    }
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -388,4 +473,125 @@ fun DocumentViewer(
             }
         }
     }
+
+    if (isAddDialogOpen) {
+        AddDocumentDialog(
+            collection = collection,
+            submitState = insertState,
+            onDismiss = { isAddDialogOpen = false },
+            onSave = { jsonText ->
+                scope.launch {
+                    presenter.onEvent(DocumentEvent.InsertDocument(profile, collection, jsonText))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun AddDocumentDialog(
+    collection: String,
+    submitState: UiState<Unit>,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+) {
+    var jsonText by remember {
+        mutableStateOf(
+            "{\n  \"title\": \"Item Baru\",\n  \"status\": \"active\",\n  \"createdAt\": \"${java.time.Instant.now()}\"\n}"
+        )
+    }
+
+    val isValidJson = remember(jsonText) {
+        isValidJsonSyntax(jsonText)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("➕ Tambah Dokumen: ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = RaksysThemeColors.TextPrimary)
+                Text(collection, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = RaksysThemeColors.Primary)
+            }
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (isValidJson) {
+                            RaksysStatusBadge("✓ Format JSON Valid", RaksysThemeColors.Success, RaksysThemeColors.SuccessBg)
+                        } else {
+                            RaksysStatusBadge("✕ Format JSON Tidak Valid", RaksysThemeColors.Error, RaksysThemeColors.ErrorBg)
+                        }
+                    }
+
+                    TextButton(
+                        onClick = {
+                            if (isValidJson) {
+                                jsonText = formatJsonPretty(jsonText)
+                            }
+                        },
+                        enabled = isValidJson,
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                        modifier = Modifier.height(24.dp)
+                    ) {
+                        Text("Rapi JSON", fontSize = 11.sp, color = RaksysThemeColors.Primary)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = jsonText,
+                    onValueChange = { jsonText = it },
+                    placeholder = { Text("{\n  \"key\": \"value\"\n}", fontSize = 12.sp, color = RaksysThemeColors.TextMuted) },
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = RaksysThemeColors.TextPrimary
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = if (isValidJson) RaksysThemeColors.Primary else RaksysThemeColors.Error,
+                        unfocusedBorderColor = if (isValidJson) RaksysThemeColors.Border else RaksysThemeColors.Error,
+                        focusedContainerColor = RaksysThemeColors.Background,
+                        unfocusedContainerColor = RaksysThemeColors.Background
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(220.dp)
+                )
+
+                if (submitState is UiState.Error) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = submitState.message,
+                        fontSize = 11.sp,
+                        color = RaksysThemeColors.Error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(jsonText) },
+                enabled = isValidJson && submitState !is UiState.Loading,
+                colors = ButtonDefaults.buttonColors(containerColor = RaksysThemeColors.Primary)
+            ) {
+                if (submitState is UiState.Loading) {
+                    CircularProgressIndicator(modifier = Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Menyimpan...", fontSize = 12.sp)
+                } else {
+                    Text("Simpan Dokumen", fontSize = 12.sp)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal", fontSize = 12.sp)
+            }
+        }
+    )
 }
