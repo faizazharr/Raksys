@@ -31,68 +31,74 @@ See [`SECURITY.md`](SECURITY.md) for the full security model.
 
 ---
 
-## 🧭 How Raksys Works (Flow Diagram)
+## 🧭 How Raksys Works
 
-The diagram below shows the whole user journey: from opening the app, to connecting, to the tools that appear depending on the database type you pick.
+Raksys follows four simple steps. Each step is explained below with a small diagram.
 
 ```mermaid
-flowchart TD
-    A(["🚀 Open Raksys"]) --> B["🏠 Studio Workspace<br/>connection sidebar"]
-    B --> C{"Saved connection?"}
-    C -->|"No"| D["➕ New Connection wizard"]
-    C -->|"Yes"| H
-
-    D --> D1["Step 1: pick engine<br/>PostgreSQL · MySQL · SQLite · MongoDB · Redis"]
-    D1 --> D2["Step 2: host, port, database, credentials<br/>+ Environment tag DEV / STG / PROD"]
-    D2 --> D3{"Behind a private network?"}
-    D3 -->|"Yes"| D4["🚇 Enable SSH tunnel<br/>known_hosts verified"]
-    D3 -->|"No"| D5
-    D4 --> D5["⚡ Test Connection"]
-    D5 -->|"Failed"| D6["Friendly error message"] --> D2
-    D5 -->|"OK"| D7["💾 Save<br/>password → OS keyring<br/>profile → connections.json"]
-    D7 --> H["Select connection in sidebar"]
-
-    H --> I{"Engine family"}
-
-    I -->|"Relational: PostgreSQL · MySQL · SQLite"| R["Relational workspace"]
-    I -->|"Document: MongoDB"| M["Collections list"]
-    I -->|"Key-Value: Redis"| K["Key browser"]
-
-    R --> R1["⚡ Query Editor<br/>tables navigator + SQL console"]
-    R --> R2["🗺️ Visual ERD"]
-    R --> R3["🛡️ Roles & Permissions<br/>PostgreSQL / MySQL"]
-
-    R1 --> Q1["Browse table 100 rows/page<br/>or write SQL"]
-    Q1 --> Q2{"PROD connection and<br/>destructive SQL?"}
-    Q2 -->|"Yes"| Q3["🛡️ Confirmation dialog"]
-    Q3 -->|"Cancel"| Q1
-    Q3 -->|"Confirm"| Q4
-    Q2 -->|"No"| Q4["▶ Run SQL<br/>30s timeout · 10,000 row cap"]
-    Q4 --> Q5["📊 Data grid<br/>sort · filter · inspect · CSV/JSON export"]
-    Q4 --> Q6["📜 Query history"]
-    R1 --> Q7["🛠️ Table structure<br/>copy DDL / INSERT template"]
-
-    R2 --> E1["Auto layout from foreign keys<br/>zoom 40%–220%"]
-    R3 --> P1["Pick role → toggle SELECT / INSERT / UPDATE / DELETE"]
-    P1 --> P2["GRANT / REVOKE<br/>revoke asks confirmation"]
-
-    M --> M1["Pick collection → JSON documents<br/>filter · pretty/compact · copy"]
-    M1 --> M2["+ Add document<br/>live JSON validation"]
-
-    K --> K1["Pattern search with SCAN<br/>e.g. user:*"]
-    K1 --> K2["Type filter · TTL badge · copy value"]
-
-    B -.-> Z(["⌘K Command Palette<br/>jump to any table, connection, or tool"])
+flowchart LR
+    A["1️⃣ Connect"] --> B["2️⃣ Pick a workspace"] --> C["3️⃣ Explore & query"] --> D["4️⃣ Stay safe"]
 ```
 
-**Reading the diagram**
+### 1️⃣ Connect to a database
 
-| Step | What happens |
-|---|---|
-| **Connect** | Pick an engine, fill the details, optionally tunnel through SSH, test, and save. Secrets go to the OS keyring, never to disk in plain text. |
-| **Choose a workspace** | The engine family decides the tools you see: SQL tools, document browser, or key browser. |
-| **Work safely** | On `PROD`-tagged connections, risky SQL always asks for confirmation before running. |
-| **Navigate fast** | `⌘K` / `Ctrl+K` reaches any table, connection, or tool from anywhere. |
+Pick an engine, fill in the details, and test before saving. Your password goes to the OS keyring, never to a plain file.
+
+```mermaid
+flowchart LR
+    A["Pick engine"] --> B["Fill details + DEV/STG/PROD tag"]
+    B --> C["SSH tunnel (optional)"]
+    C --> D["Test connection"]
+    D -->|"OK"| E["Save"]
+    D -->|"Failed"| F["Friendly error"] --> B
+```
+
+### 2️⃣ Get the right workspace
+
+The database type decides which tools you see.
+
+```mermaid
+flowchart LR
+    A["Select connection"] --> B{"Engine"}
+    B -->|"PostgreSQL / MySQL / SQLite"| C["SQL workspace"]
+    B -->|"MongoDB"| D["Document browser"]
+    B -->|"Redis"| E["Key browser"]
+```
+
+### 3️⃣ Explore & query (SQL workspace)
+
+Three tabs cover everyday database work.
+
+```mermaid
+flowchart LR
+    A["SQL workspace"] --> B["⚡ Query Editor<br/>tables + SQL console + grid"]
+    A --> C["🗺️ Visual ERD<br/>table relationships"]
+    A --> D["🛡️ Roles & Permissions<br/>GRANT / REVOKE"]
+```
+
+### 3️⃣ Explore (MongoDB & Redis)
+
+```mermaid
+flowchart LR
+    M["MongoDB"] --> M1["Collections"] --> M2["JSON documents"] --> M3["Add document"]
+    R["Redis"] --> R1["Search keys (SCAN)"] --> R2["Filter by type"] --> R3["View value + TTL"]
+```
+
+### 4️⃣ Run SQL safely
+
+On connections tagged `PROD`, risky statements need your confirmation first.
+
+```mermaid
+flowchart LR
+    A["Write SQL"] --> B{"PROD + destructive?"}
+    B -->|"No"| D["Run"]
+    B -->|"Yes"| C["Confirm dialog"]
+    C -->|"Confirm"| D
+    C -->|"Cancel"| A
+    D --> E["Data grid + history"]
+```
+
+> ⌨️ **Tip:** press `⌘K` / `Ctrl+K` anywhere to jump to any table, connection, or tool.
 
 ---
 
