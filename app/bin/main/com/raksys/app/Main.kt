@@ -47,13 +47,18 @@ import com.raksys.feature.permission.PermissionScreen
 import com.raksys.feature.permission.permissionModule
 import com.raksys.feature.query.QueryEditor
 import com.raksys.feature.query.queryModule
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.text.font.FontFamily
+import com.raksys.feature.connection.ConnectionPresenter
+import com.raksys.feature.navigator.NavigatorPresenter
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import java.awt.Taskbar
 import javax.imageio.ImageIO
 
-private enum class RelationalTab(val label: String, val icon: String) {
+enum class RelationalTab(val label: String, val icon: String) {
     QUERY("Query Editor", "⚡"),
     ERD("Visual ERD", "🗺️"),
     PERMISSIONS("Roles & Permissions", "🛡️"),
@@ -164,11 +169,19 @@ fun main() {
             val documentDriver = koinInject<DocumentDatabaseDriver>()
             val keyValueDriver = koinInject<KeyValueDriver>()
             val sshTunnelManager = koinInject<SshTunnelManager>()
+            val connectionPresenter = koinInject<ConnectionPresenter>()
+            val navigatorPresenter = koinInject<NavigatorPresenter>()
+
+            val allConnections by connectionPresenter.profiles.collectAsState()
+            val schemaState by navigatorPresenter.state.collectAsState()
+            val currentTables = (schemaState as? com.raksys.core.model.UiState.Success)?.data ?: emptyList()
 
             var selectedProfile by remember { mutableStateOf<ConnectionProfile?>(null) }
             var selectedTable by remember { mutableStateOf<TableSchema?>(null) }
             var selectedCollection by remember { mutableStateOf<String?>(null) }
             var showAddConnectionDialog by remember { mutableStateOf(false) }
+            var isCommandPaletteOpen by remember { mutableStateOf(false) }
+            var workspaceTab by remember { mutableStateOf(RelationalTab.QUERY) }
 
             // Spatial & Layout States
             var isSidebarVisible by remember { mutableStateOf(true) }
@@ -185,14 +198,36 @@ fun main() {
                 },
                 title = "Raksys Database Studio",
                 icon = androidx.compose.ui.res.painterResource("icon.png"),
+                onKeyEvent = { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown &&
+                        (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) &&
+                        keyEvent.key == Key.K
+                    ) {
+                        isCommandPaletteOpen = !isCommandPaletteOpen
+                        true
+                    } else if (keyEvent.type == KeyEventType.KeyDown &&
+                        (keyEvent.isMetaPressed || keyEvent.isCtrlPressed) &&
+                        keyEvent.key == Key.B
+                    ) {
+                        isSidebarVisible = !isSidebarVisible
+                        true
+                    } else {
+                        false
+                    }
+                }
             ) {
                 RaksysAppTheme {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(RaksysThemeColors.Background)
                         ) {
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                            ) {
                             if (isSidebarVisible) {
                                 Box(modifier = Modifier.width(sidebarWidthDp).fillMaxHeight()) {
                                     ConnectionListScreen(
@@ -226,8 +261,6 @@ fun main() {
                                 }
 
                                 currentProfile.dbType.family == DbFamily.RELATIONAL -> {
-                                    var workspaceTab by remember(currentProfile.id) { mutableStateOf(RelationalTab.QUERY) }
-
                                     Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                                         RelationalTabBar(
                                             selected = workspaceTab,
@@ -317,7 +350,124 @@ fun main() {
                             }
                         }
 
-                        // Global Floating Toast Host
+                        HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
+
+                        // Studio Bottom Status Bar (24.dp)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(24.dp)
+                                .background(RaksysThemeColors.SurfaceElevated)
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val curr = selectedProfile
+                                if (curr != null) {
+                                    val (envColor, envLabel) = when (curr.environment) {
+                                        com.raksys.core.model.EnvironmentType.DEVELOPMENT -> RaksysThemeColors.EnvDev to "DEV"
+                                        com.raksys.core.model.EnvironmentType.STAGING -> RaksysThemeColors.EnvStaging to "STG"
+                                        com.raksys.core.model.EnvironmentType.PRODUCTION -> RaksysThemeColors.EnvProd to "PROD"
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(7.dp)
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(envColor)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "${curr.name} • ${curr.dbType.name} [$envLabel]",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = RaksysThemeColors.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    val dbDesc = if (curr.dbType == com.raksys.core.model.DbType.SQLITE) curr.database.ifBlank { "SQLite File" }
+                                    else "${curr.host}:${curr.port} / ${curr.database.ifBlank { "default" }}"
+                                    Text(
+                                        text = "• $dbDesc",
+                                        fontSize = 10.sp,
+                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                        color = RaksysThemeColors.TextMuted
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(7.dp)
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(RaksysThemeColors.TextMuted)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Tidak Ada Koneksi Aktif",
+                                        fontSize = 11.sp,
+                                        color = RaksysThemeColors.TextMuted
+                                    )
+                                }
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(RaksysThemeColors.SurfaceElevated)
+                                        .border(1.dp, RaksysThemeColors.Border, RoundedCornerShape(4.dp))
+                                        .clickable { isCommandPaletteOpen = true }
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "⌘K Command Palette",
+                                        fontSize = 10.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        color = RaksysThemeColors.Primary
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Text(
+                                    text = "⌘↵ Run SQL  •  ⌘B Sidebar",
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = RaksysThemeColors.TextMuted
+                                )
+                            }
+                        }
+                    }
+
+                    if (isCommandPaletteOpen) {
+                        CommandPaletteDialog(
+                            currentProfile = selectedProfile,
+                            connections = allConnections,
+                            tables = currentTables,
+                            onSelectProfile = { profile ->
+                                selectedProfile = profile
+                                selectedTable = null
+                                selectedCollection = null
+                            },
+                            onSelectTable = { table ->
+                                selectedTable = table
+                                workspaceTab = RelationalTab.QUERY
+                            },
+                            onSelectTab = { tab ->
+                                workspaceTab = tab
+                            },
+                            onNewConnection = {
+                                showAddConnectionDialog = true
+                            },
+                            onToggleSidebar = {
+                                isSidebarVisible = !isSidebarVisible
+                            },
+                            onDismiss = { isCommandPaletteOpen = false }
+                        )
+                    }
+
+                    // Global Floating Toast Host (elevated above bottom status bar)
+                    Box(modifier = Modifier.fillMaxSize().padding(bottom = 26.dp)) {
                         ToastHost()
                     }
                 }
@@ -325,3 +475,5 @@ fun main() {
         }
     }
 }
+}
+

@@ -21,11 +21,14 @@ import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
 import com.raksys.core.model.UiState
+import com.raksys.core.security.CredentialStore
 import com.raksys.core.ui.LightningIcon
 import com.raksys.core.ui.PlugIcon
 import com.raksys.core.ui.RaksysThemeColors
+import com.raksys.core.ui.ToastManager
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import java.util.UUID
 
 @Composable
 fun ConnectionListScreen(
@@ -35,6 +38,7 @@ fun ConnectionListScreen(
     onShowAddDialogChange: (Boolean) -> Unit,
 ) {
     val presenter = koinInject<ConnectionPresenter>()
+    val credentialStore = koinInject<CredentialStore>()
     val profiles by presenter.profiles.collectAsState()
     val testState by presenter.testState.collectAsState()
     val saveState by presenter.saveState.collectAsState()
@@ -43,6 +47,8 @@ fun ConnectionListScreen(
     var pendingDelete by remember { mutableStateOf<ConnectionProfile?>(null) }
     var pickTypeOpen by remember { mutableStateOf(false) }
     var formDbType by remember { mutableStateOf<DbType?>(null) }
+    var editingProfile by remember { mutableStateOf<ConnectionProfile?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     var quickCreateOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -51,15 +57,18 @@ fun ConnectionListScreen(
             presenter.onEvent(ConnectionEvent.ResetSaveState)
             pickTypeOpen = true
             formDbType = null
+            editingProfile = null
         } else {
             pickTypeOpen = false
             formDbType = null
+            editingProfile = null
         }
     }
 
     LaunchedEffect(saveState) {
         if (saveState is UiState.Success) {
             formDbType = null
+            editingProfile = null
             quickCreateOpen = false
             onShowAddDialogChange(false)
         }
@@ -145,6 +154,42 @@ fun ConnectionListScreen(
 
         HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
 
+        if (profiles.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("🔍 Filter koneksi...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(6.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = RaksysThemeColors.Primary,
+                        unfocusedBorderColor = RaksysThemeColors.Border,
+                        focusedContainerColor = RaksysThemeColors.SurfaceElevated,
+                        unfocusedContainerColor = RaksysThemeColors.SurfaceElevated,
+                        focusedTextColor = RaksysThemeColors.TextPrimary,
+                        unfocusedTextColor = RaksysThemeColors.TextPrimary,
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(32.dp)
+                )
+            }
+            HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)
+        }
+
+        val filteredProfiles = remember(profiles, searchQuery) {
+            if (searchQuery.isBlank()) profiles
+            else profiles.filter {
+                it.name.contains(searchQuery, ignoreCase = true) ||
+                it.host.contains(searchQuery, ignoreCase = true) ||
+                it.database.contains(searchQuery, ignoreCase = true) ||
+                it.dbType.name.contains(searchQuery, ignoreCase = true)
+            }
+        }
+
         Box(modifier = Modifier.weight(1f)) {
             if (profiles.isEmpty()) {
                 // Sidebar Compact Empty State
@@ -200,13 +245,25 @@ fun ConnectionListScreen(
                         Text("+ Buat Koneksi", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
+            } else if (filteredProfiles.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Tidak ada koneksi yang cocok dengan '$searchQuery'",
+                        fontSize = 12.sp,
+                        color = RaksysThemeColors.TextMuted,
+                        textAlign = TextAlign.Center
+                    )
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(profiles, key = { it.id }) { profile ->
+                    items(filteredProfiles, key = { it.id }) { profile ->
                         val isSelected = selectedProfile?.id == profile.id
                         val isTestingThis = testingProfileId == profile.id && testState is UiState.Loading
 
@@ -218,6 +275,20 @@ fun ConnectionListScreen(
                             onTest = {
                                 testingProfileId = profile.id
                                 scope.launch { presenter.onEvent(ConnectionEvent.Test(profile)) }
+                            },
+                            onEdit = {
+                                editingProfile = profile
+                                formDbType = profile.dbType
+                            },
+                            onClone = {
+                                val newId = UUID.randomUUID().toString()
+                                val clone = profile.copy(id = newId, name = "${profile.name} (Copy)")
+                                val pass = credentialStore.get(profile.id) ?: ""
+                                val sshPass = credentialStore.get("${profile.id}:ssh") ?: ""
+                                scope.launch {
+                                    presenter.onEvent(ConnectionEvent.Add(clone, pass, sshPass, createNew = false))
+                                    ToastManager.show("Koneksi '${profile.name}' berhasil digandakan")
+                                }
                             },
                             onDelete = { pendingDelete = profile }
                         )
@@ -245,12 +316,15 @@ fun ConnectionListScreen(
     formDbType?.let { type ->
         ConnectionFormDialog(
             initialDbType = type,
+            editingProfile = editingProfile,
             onDismiss = {
                 formDbType = null
+                editingProfile = null
                 onShowAddDialogChange(false)
             },
             onChangeType = {
                 formDbType = null
+                editingProfile = null
                 pickTypeOpen = true
             },
             submitState = saveState,
