@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.TableSchema
 import com.raksys.core.model.UiState
+import com.raksys.core.ui.RaksysSearchField
 import com.raksys.core.ui.RefreshIcon
 import com.raksys.core.ui.RaksysEmptyState
 import com.raksys.core.ui.RaksysErrorState
@@ -85,21 +86,11 @@ fun SchemaNavigator(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            OutlinedTextField(
+            RaksysSearchField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Filter tabel...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                singleLine = true,
-                shape = RoundedCornerShape(6.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RaksysThemeColors.Primary,
-                    unfocusedBorderColor = RaksysThemeColors.Border,
-                    focusedContainerColor = RaksysThemeColors.Background,
-                    unfocusedContainerColor = RaksysThemeColors.Background
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(38.dp)
+                placeholder = "Filter tabel...",
+                modifier = Modifier.fillMaxWidth()
             )
         }
 

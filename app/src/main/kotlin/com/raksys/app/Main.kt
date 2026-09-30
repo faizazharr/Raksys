@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.raksys.core.database.DatabaseDriver
 import com.raksys.core.database.DocumentDatabaseDriver
 import com.raksys.core.database.KeyValueDriver
@@ -212,6 +213,7 @@ fun main() {
                     sshTunnelManager.closeAll()
                     exitApplication()
                 },
+                state = rememberWindowState(width = 1280.dp, height = 800.dp),
                 title = "Raksys Database Studio",
                 icon = androidx.compose.ui.res.painterResource("icon.png"),
             ) {
@@ -427,7 +429,10 @@ fun main() {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f, fill = false),
+                            ) {
                                 val curr = selectedProfile
                                 if (curr != null) {
                                     val (envColor, envLabel) = when (curr.environment) {
@@ -456,7 +461,10 @@ fun main() {
                                         text = "• $dbDesc",
                                         fontSize = 11.sp,
                                         fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                                        color = RaksysThemeColors.TextMuted
+                                        color = RaksysThemeColors.TextMuted,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
                                     )
                                 } else {
                                     Box(

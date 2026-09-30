@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.TableSchema
+import com.raksys.core.ui.RaksysSearchField
 import com.raksys.core.ui.LinkIcon
 import com.raksys.core.ui.KeyIcon
 import com.raksys.core.ui.RaksysThemeColors
@@ -115,6 +116,8 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .horizontalScroll(rememberScrollState())
                 .verticalScroll(rememberScrollState())
+                // Room for the floating search bar so it never covers the first row of tables.
+                .padding(top = 60.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -207,21 +210,11 @@ fun ErdCanvas(tables: List<TableSchema>, modifier: Modifier = Modifier) {
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
+            RaksysSearchField(
                 value = erdSearchQuery,
                 onValueChange = { erdSearchQuery = it },
-                placeholder = { Text("Cari tabel di ERD...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                singleLine = true,
-                shape = RoundedCornerShape(6.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RaksysThemeColors.Primary,
-                    unfocusedBorderColor = RaksysThemeColors.Border,
-                    focusedContainerColor = RaksysThemeColors.Background,
-                    unfocusedContainerColor = RaksysThemeColors.Background,
-                    focusedTextColor = RaksysThemeColors.TextPrimary,
-                    unfocusedTextColor = RaksysThemeColors.TextPrimary,
-                ),
-                modifier = Modifier.width(180.dp).height(30.dp)
+                placeholder = "Cari tabel di ERD...",
+                modifier = Modifier.width(180.dp)
             )
 
             if (erdSearchQuery.isNotBlank()) {

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raksys.core.model.ColumnDefinition
 import com.raksys.core.model.TableSchema
+import com.raksys.core.ui.RaksysSearchField
 import com.raksys.core.ui.RaksysStatusBadge
 import com.raksys.core.ui.RaksysThemeColors
 import com.raksys.core.ui.ToastManager
@@ -109,21 +110,11 @@ fun TableStructureInspector(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
 
-                OutlinedTextField(
+                RaksysSearchField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Filter kolom / tipe...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(6.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = RaksysThemeColors.Primary,
-                        unfocusedBorderColor = RaksysThemeColors.Border,
-                        focusedContainerColor = RaksysThemeColors.Background,
-                        unfocusedContainerColor = RaksysThemeColors.Background,
-                        focusedTextColor = RaksysThemeColors.TextPrimary,
-                        unfocusedTextColor = RaksysThemeColors.TextPrimary,
-                    ),
-                    modifier = Modifier.width(220.dp).height(32.dp)
+                    placeholder = "Filter kolom / tipe...",
+                    modifier = Modifier.width(220.dp)
                 )
             }
 

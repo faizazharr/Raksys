@@ -188,19 +188,11 @@ fun DocumentCollectionList(
 
         // Filter collections
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp)) {
-            OutlinedTextField(
+            RaksysSearchField(
                 value = filterText,
                 onValueChange = { filterText = it },
-                placeholder = { Text("Cari collection...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                singleLine = true,
-                shape = RoundedCornerShape(6.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RaksysThemeColors.Primary,
-                    unfocusedBorderColor = RaksysThemeColors.Border,
-                    focusedContainerColor = RaksysThemeColors.Background,
-                    unfocusedContainerColor = RaksysThemeColors.Background
-                ),
-                modifier = Modifier.fillMaxWidth().height(32.dp)
+                placeholder = "Cari collection...",
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
@@ -329,19 +321,11 @@ fun DocumentViewer(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                OutlinedTextField(
+                RaksysSearchField(
                     value = searchDocQuery,
                     onValueChange = { searchDocQuery = it },
-                    placeholder = { Text("Filter _id / keyword dokumen...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(6.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = RaksysThemeColors.Primary,
-                        unfocusedBorderColor = RaksysThemeColors.Border,
-                        focusedContainerColor = RaksysThemeColors.Background,
-                        unfocusedContainerColor = RaksysThemeColors.Background
-                    ),
-                    modifier = Modifier.widthIn(max = 260.dp).height(32.dp)
+                    placeholder = "Filter _id / keyword dokumen...",
+                    modifier = Modifier.widthIn(max = 260.dp)
                 )
             }
 

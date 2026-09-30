@@ -22,6 +22,7 @@ import com.raksys.core.model.ConnectionProfile
 import com.raksys.core.model.DbType
 import com.raksys.core.model.UiState
 import com.raksys.core.security.CredentialStore
+import com.raksys.core.ui.RaksysSearchField
 import com.raksys.core.ui.LightningIcon
 import com.raksys.core.ui.PlugIcon
 import com.raksys.core.ui.RaksysThemeColors
@@ -160,21 +161,12 @@ fun ConnectionListScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
-                OutlinedTextField(
+                RaksysSearchField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Filter koneksi...", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(6.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = RaksysThemeColors.Primary,
-                        unfocusedBorderColor = RaksysThemeColors.Border,
-                        focusedContainerColor = RaksysThemeColors.SurfaceElevated,
-                        unfocusedContainerColor = RaksysThemeColors.SurfaceElevated,
-                        focusedTextColor = RaksysThemeColors.TextPrimary,
-                        unfocusedTextColor = RaksysThemeColors.TextPrimary,
-                    ),
-                    modifier = Modifier.fillMaxWidth().height(32.dp)
+                    placeholder = "Filter koneksi...",
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = RaksysThemeColors.SurfaceElevated
                 )
             }
             HorizontalDivider(color = RaksysThemeColors.Border, thickness = 1.dp)

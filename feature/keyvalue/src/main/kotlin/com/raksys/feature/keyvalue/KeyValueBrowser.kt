@@ -79,21 +79,11 @@ fun KeyValueBrowser(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 
-                OutlinedTextField(
+                RaksysSearchField(
                     value = pattern,
                     onValueChange = { pattern = it },
-                    placeholder = { Text("Pattern (cth: * atau user:*)", fontSize = 11.sp, color = RaksysThemeColors.TextMuted) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(6.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = RaksysThemeColors.Primary,
-                        unfocusedBorderColor = RaksysThemeColors.Border,
-                        focusedContainerColor = RaksysThemeColors.Background,
-                        unfocusedContainerColor = RaksysThemeColors.Background
-                    ),
-                    modifier = Modifier
-                        .widthIn(max = 280.dp)
-                        .height(32.dp)
+                    placeholder = "Pattern (cth: * atau user:*)",
+                    modifier = Modifier.widthIn(max = 280.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
